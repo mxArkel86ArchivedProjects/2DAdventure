@@ -52,3 +52,21 @@ X::Rect::Rect(Point topleft, Point bottomright) {
 	this->topleft = topleft;
 	this->bottomright = bottomright;
 }
+
+X::Point X::Rect::topLeft(){
+			return topleft;
+		}
+X::Point X::Rect::bottomRight(){
+			return bottomright;
+}
+X::Rect::Rect(){
+
+}
+D2D1_RECT_F X::Rect::toRectF(){
+	return D2D1::RectF(topleft.getX(), topleft.getY(), bottomright.getX(), bottomright.getY());
+}
+
+X::Rect::Rect(double left, double top, double right, double bottom){
+	this->topleft = X::Point(left, top);
+	this->bottomright = X::Point(right, bottom);
+}

@@ -14,7 +14,8 @@ struct CollisionReturn {
 	double disp_y;
 };
 
-static CollisionReturn DynamicCollision(Rect a, Rect b, double dx, double dy);
-static bool staticCollision(Rect a, Rect b);
-
-
+class CollisionUtil{
+	public:
+	static CollisionReturn DynamicCollision(Rect a, Rect b, double dx, double dy);
+	static bool staticCollision(Rect a, Rect b);
+};

@@ -15,6 +15,7 @@
 static Application app = NULL;
 static ID2D1HwndRenderTarget* pRT = NULL;
 static ID2D1Factory* pD2DFactory = NULL;
+static IDWriteFactory* pDWriteFactory;
 
 long tick = 0;
 
@@ -62,6 +63,12 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         &pD2DFactory
     );
 
+    DWriteCreateFactory(
+        DWRITE_FACTORY_TYPE_SHARED,
+        __uuidof(IDWriteFactory),
+        reinterpret_cast<IUnknown**>(&pDWriteFactory)
+        );
+
     // Obtain the size of the drawing area.
     RECT rc;
     GetClientRect(hWnd, &rc);
@@ -80,7 +87,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     );
 
     app = Application(hWnd);
-    app.InitResources(pRT);
+    app.InitResources(pRT, pDWriteFactory);
     
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
@@ -121,6 +128,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
         UINT height = HIWORD(lParam);
         pRT->Resize(D2D1::SizeU(width, height));
         RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
+
+        GetClientRect(hWnd, app.WINSIZE);
+        app.onResize(app.WINSIZE->right, app.WINSIZE->bottom);
         break;
     }
     case WM_KEYDOWN:
@@ -133,6 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
         Peripherals::KeyPressIn(wParam, false);
         break;
     }
+    
     case WM_TIMER:
     {
         switch (wParam)
@@ -153,6 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     case WM_DESTROY:
     {
         SafeRelease(pRT);
+        SafeRelease(pDWriteFactory);
         app.DeinitResources();
         SafeRelease(pD2DFactory);
 

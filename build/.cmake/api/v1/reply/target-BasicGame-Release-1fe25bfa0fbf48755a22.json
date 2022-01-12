@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "BasicGame/RelWithDebInfo/BasicGame.exe"
+			"path" : "BasicGame/Release/BasicGame.exe"
 		},
 		{
-			"path" : "BasicGame/RelWithDebInfo/BasicGame.pdb"
+			"path" : "BasicGame/Release/BasicGame.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -38,7 +38,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /Zi /O2 /Ob1 /DNDEBUG"
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG"
 				}
 			],
 			"language" : "CXX",
@@ -47,8 +47,9 @@
 				0,
 				1,
 				3,
-				6,
-				9
+				5,
+				9,
+				11
 			]
 		}
 	],
@@ -64,11 +65,11 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /Zi /O2 /Ob1 /DNDEBUG",
+				"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /debug /INCREMENTAL /subsystem:windows",
+				"fragment" : "/machine:X86 /INCREMENTAL:NO /subsystem:windows",
 				"role" : "flags"
 			},
 			{
@@ -94,8 +95,9 @@
 				0,
 				1,
 				3,
-				6,
-				9
+				5,
+				9,
+				11
 			]
 		},
 		{
@@ -104,10 +106,11 @@
 			[
 				2,
 				4,
-				5,
+				6,
 				7,
 				8,
-				10
+				10,
+				12
 			]
 		}
 	],
@@ -143,14 +146,14 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "BasicGame/CollisionUtil.h",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "BasicGame/CollisionUtil.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "BasicGame/CollisionUtil.h",
+			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
@@ -171,6 +174,17 @@
 		{
 			"backtrace" : 1,
 			"path" : "BasicGame/imports.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "BasicGame/GameObject.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "BasicGame/GameObject.h",
 			"sourceGroupIndex" : 1
 		}
 	],

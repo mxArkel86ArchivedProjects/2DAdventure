@@ -69,7 +69,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "BasicGame::@6942dedb3795cb924f70",
-					"jsonFile" : "target-BasicGame-Debug-89142f07467293fc1ec9.json",
+					"jsonFile" : "target-BasicGame-Debug-318f6d34a7bcb9e458e9.json",
 					"name" : "BasicGame",
 					"projectIndex" : 0
 				},
@@ -150,7 +150,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "BasicGame::@6942dedb3795cb924f70",
-					"jsonFile" : "target-BasicGame-Release-61474b585e5d951c2147.json",
+					"jsonFile" : "target-BasicGame-Release-1fe25bfa0fbf48755a22.json",
 					"name" : "BasicGame",
 					"projectIndex" : 0
 				},
@@ -231,7 +231,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "BasicGame::@6942dedb3795cb924f70",
-					"jsonFile" : "target-BasicGame-MinSizeRel-44659824406285801076.json",
+					"jsonFile" : "target-BasicGame-MinSizeRel-f77980ab73b471ce6c10.json",
 					"name" : "BasicGame",
 					"projectIndex" : 0
 				},
@@ -312,7 +312,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "BasicGame::@6942dedb3795cb924f70",
-					"jsonFile" : "target-BasicGame-RelWithDebInfo-04fd1a1376f1548f6ea8.json",
+					"jsonFile" : "target-BasicGame-RelWithDebInfo-46df2c8fae0e096169a5.json",
 					"name" : "BasicGame",
 					"projectIndex" : 0
 				},

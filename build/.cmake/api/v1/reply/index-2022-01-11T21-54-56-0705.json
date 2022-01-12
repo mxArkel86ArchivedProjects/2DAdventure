@@ -5,7 +5,7 @@
 		{
 			"multiConfig" : true,
 			"name" : "Visual Studio 16 2019",
-			"platform" : "x64"
+			"platform" : "win32"
 		},
 		"paths" : 
 		{
@@ -27,7 +27,7 @@
 	"objects" : 
 	[
 		{
-			"jsonFile" : "codemodel-v2-4adb063d400dda42dcee.json",
+			"jsonFile" : "codemodel-v2-1b5153bce2c6a233b19b.json",
 			"kind" : "codemodel",
 			"version" : 
 			{
@@ -36,7 +36,7 @@
 			}
 		},
 		{
-			"jsonFile" : "cache-v2-ffe7c9cba223a30c758b.json",
+			"jsonFile" : "cache-v2-978fd276485341e3f9a4.json",
 			"kind" : "cache",
 			"version" : 
 			{
@@ -54,7 +54,7 @@
 			}
 		},
 		{
-			"jsonFile" : "toolchains-v1-f28ea560afa57ad87a93.json",
+			"jsonFile" : "toolchains-v1-73a71c892de9a6b49ad2.json",
 			"kind" : "toolchains",
 			"version" : 
 			{
@@ -69,7 +69,7 @@
 		{
 			"cache-v2" : 
 			{
-				"jsonFile" : "cache-v2-ffe7c9cba223a30c758b.json",
+				"jsonFile" : "cache-v2-978fd276485341e3f9a4.json",
 				"kind" : "cache",
 				"version" : 
 				{
@@ -89,7 +89,7 @@
 			},
 			"codemodel-v2" : 
 			{
-				"jsonFile" : "codemodel-v2-4adb063d400dda42dcee.json",
+				"jsonFile" : "codemodel-v2-1b5153bce2c6a233b19b.json",
 				"kind" : "codemodel",
 				"version" : 
 				{
@@ -120,7 +120,7 @@
 				"responses" : 
 				[
 					{
-						"jsonFile" : "cache-v2-ffe7c9cba223a30c758b.json",
+						"jsonFile" : "cache-v2-978fd276485341e3f9a4.json",
 						"kind" : "cache",
 						"version" : 
 						{
@@ -129,7 +129,7 @@
 						}
 					},
 					{
-						"jsonFile" : "codemodel-v2-4adb063d400dda42dcee.json",
+						"jsonFile" : "codemodel-v2-1b5153bce2c6a233b19b.json",
 						"kind" : "codemodel",
 						"version" : 
 						{
@@ -138,7 +138,7 @@
 						}
 					},
 					{
-						"jsonFile" : "toolchains-v1-f28ea560afa57ad87a93.json",
+						"jsonFile" : "toolchains-v1-73a71c892de9a6b49ad2.json",
 						"kind" : "toolchains",
 						"version" : 
 						{

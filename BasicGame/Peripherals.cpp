@@ -1,12 +1,37 @@
 #include "Peripherals.h"
 
 std::unordered_map<WPARAM, bool> Peripherals::key_reg = std::unordered_map<WPARAM, bool>();
+std::wstringstream Peripherals::characterqueue = std::wstringstream();
+
+bool Peripherals::queuestate = false;
+bool Peripherals::queueupdate = false;
 
 void Peripherals::KeyPressIn(WPARAM p, bool type) {
+	if(queuestate&&type&&p!=0xC0 &&p!=VK_BACK){
+		if(p>='A' && p<='Z')
+			characterqueue.put(p-'A'+'a');
+		else
+		characterqueue.put(p);
+		queueupdate = true;
+	}
 	key_reg[p] = type;
 }
 
 bool Peripherals::keyPressed(WPARAM p) {
 	return key_reg[p]==NULL?0:key_reg[p];
-	return false;
+}
+
+const wchar_t * empty_wstr = L"";
+std::wstring Peripherals::unloadQueue(){
+	std::wstring str = characterqueue.str();
+	characterqueue.str(empty_wstr);
+	queueupdate = false;
+	return str;
+}
+void Peripherals::queueState(bool b){
+	queuestate = b;
+}
+
+bool Peripherals::queueUpdate(){
+	return queueupdate;
 }

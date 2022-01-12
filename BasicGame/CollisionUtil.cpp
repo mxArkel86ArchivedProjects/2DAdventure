@@ -1,7 +1,7 @@
 #include "CollisionUtil.h"
 #include <math.h>
 
-CollisionReturn DynamicCollision(Rect a, Rect b, double dx, double dy) {
+CollisionReturn CollisionUtil::DynamicCollision(Rect a, Rect b, double dx, double dy) {
 	CollisionReturn ret =  CollisionReturn();
 
 	char intent_x = dx > 0.01 ? 1 : dx < -0.01 ? -1 : 0;
@@ -215,7 +215,7 @@ CollisionReturn DynamicCollision(Rect a, Rect b, double dx, double dy) {
 	return ret;
 }
 
-bool staticCollision(Rect a, Rect b) {
+bool CollisionUtil::staticCollision(Rect a, Rect b) {
 	bool inline_x = (a.top() < b.bottom() && a.top() > b.top())
 		|| (a.bottom() < b.bottom() && a.bottom() > b.top()) || (a.top() < b.top() && a.bottom() > b.bottom());
 	bool inline_y = (a.left() < b.right() && a.left() > b.left())
