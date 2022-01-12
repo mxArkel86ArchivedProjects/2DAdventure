@@ -318,6 +318,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\BasicGame\imports.h" />
     <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\BasicGame\GameObject.cpp" />
     <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\BasicGame\GameObject.h" />
+    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\BasicGame\LevelProp.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\BasicGame\LevelProp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\nicho\source\repos\BasicGame\build\ZERO_CHECK.vcxproj">

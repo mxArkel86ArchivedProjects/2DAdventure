@@ -7,9 +7,13 @@ bool Peripherals::queuestate = false;
 bool Peripherals::queueupdate = false;
 int Peripherals::mousex = 0;
 int Peripherals::mousey = 0;
-int Peripherals::mouseclick_x = 0;
-int Peripherals::mouseclick_y = 0;
-bool Peripherals::mouseclicked = false;
+int Peripherals::mouseclick_xl = 0;
+int Peripherals::mouseclick_yl = 0;
+bool Peripherals::mouseclicked_l = false;
+
+int Peripherals::mouseclick_xr = 0;
+int Peripherals::mouseclick_yr = 0;
+bool Peripherals::mouseclicked_r = false;
 
 void Peripherals::KeyPressIn(WPARAM p, bool type) {
 	if(queuestate&&type&&p!=0xC0 &&p!=VK_BACK){
@@ -46,15 +50,29 @@ void Peripherals::MouseMoveIn(int x, int y){
 	Peripherals::mousey = y;
 }
 
-void Peripherals::mouseClickIn(int x, int y){
-	mouseclick_x = x;
-	mouseclick_y = y;
-	mouseclicked = true;
+void Peripherals::mouseClickLeftIn(int x, int y){
+	mouseclick_xl = x;
+	mouseclick_yl = y;
+	mouseclicked_l = true;
 }
 
-bool Peripherals::mouseClicked(){
-	if(mouseclicked){
-		mouseclicked = false;
+bool Peripherals::mouseClickedLeft(){
+	if(mouseclicked_l){
+		mouseclicked_l = false;
+		return true;
+	}
+	return false;
+}
+
+void Peripherals::mouseClickRightIn(int x, int y){
+	mouseclick_xr = x;
+	mouseclick_yr = y;
+	mouseclicked_r = true;
+}
+
+bool Peripherals::mouseClickedRight(){
+	if(mouseclicked_r){
+		mouseclicked_r = false;
 		return true;
 	}
 	return false;
@@ -65,6 +83,10 @@ X::Point Peripherals::mousePos(){
 	return X::Point(Peripherals::mousex, Peripherals::mousey);
 }
 
-X::Point Peripherals::mouseClickPos(){
-	return X::Point(mouseclick_x, mouseclick_y);
+X::Point Peripherals::mouseClickLeftPos(){
+	return X::Point(mouseclick_xl, mouseclick_yl);
+}
+
+X::Point Peripherals::mouseClickRightPos(){
+	return X::Point(mouseclick_xr, mouseclick_yr);
 }

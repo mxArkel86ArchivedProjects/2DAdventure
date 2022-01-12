@@ -154,7 +154,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     {
         UINT x = LOWORD(lParam);
         UINT y = HIWORD(lParam);
-        Peripherals::mouseClickIn(x, y);
+        Peripherals::mouseClickLeftIn(x, y);
+        break;
+    }
+    case WM_RBUTTONDOWN:
+    {
+        UINT x = LOWORD(lParam);
+        UINT y = HIWORD(lParam);
+        Peripherals::mouseClickRightIn(x, y);
         break;
     }
     case WM_TIMER:

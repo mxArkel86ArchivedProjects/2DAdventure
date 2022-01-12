@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "CollisionUtil.h"
 #include <string>
+#include "LevelProp.h"
 
 using std::vector;
 using std::string;
@@ -17,6 +18,7 @@ ID2D1SolidColorBrush* GREEN_b = NULL;
 ID2D1SolidColorBrush* ORANGE_b = NULL;
 ID2D1SolidColorBrush* debug_background = NULL;
 IDWriteTextFormat* console_txt;
+IDWriteTextFormat* debug_txt;
 
 #define PLAYER_SIZE 38
 #define GRIDSIZE 40
@@ -37,7 +39,11 @@ wstring current_command = L"";
 X::Point firstpoint = X::Point();
 X::Point secondpoint = X::Point();
 bool firstpoint_b = true;
+int editmode = 0;
+double select_z = 1;
+bool select_z_toggle = true;
 
+X::Rect schemToLocalZ(X::Rect r, double z, int width, int height);
 X::Rect schemToLocal(X::Rect r);
 X::Point schemToLocalPoint(X::Point r);
 class ConsoleLine {
@@ -54,6 +60,8 @@ vector<ConsoleLine> console_history = vector<ConsoleLine>();
 vector<GameObject*> colliders = vector<GameObject*>();
 
 vector<GameObject*> newcolliders = vector<GameObject*>();
+vector<LevelProp*> props = vector<LevelProp*>();
+vector<LevelProp*> newprops = vector<LevelProp*>();
 
 X::Rect PLAYER_SCREEN_LOC;
 X::Rect SCREEN_BOUNDS;
@@ -100,25 +108,49 @@ void Application::Paint(ID2D1HwndRenderTarget* pRT) {
 		X::Rect obj = schemToLocal(collider->getRect());
 		pRT->DrawRectangle(obj.toRectF(), RED_b, 4);
 	}
+	
+	for(LevelProp* p : props){
+		Rect r = p->rect;
+		
+		X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+		pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
 
+	//draw console
 	if(console_up){
-	pRT->FillRectangle(SCREEN_BOUNDS.toRectF(), debug_background);
-	
-	for (int i = 0; i < console_history.size() && i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+25<WINSIZE->bottom-50; i++) {
-	 	ConsoleLine line = console_history[i];
-		ID2D1SolidColorBrush* color = line.getOwner()==0?ORANGE_b:WHITE_b;
-	 	
-		pRT->DrawTextA(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+20, WINSIZE->right-40,i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+CONSOLE_TEXT_SIZE+20), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
-	 }
-	
-	pRT->DrawTextA(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, WINSIZE->bottom-20-CONSOLE_TEXT_SIZE, WINSIZE->right-40,WINSIZE->bottom-20), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+		pRT->FillRectangle(SCREEN_BOUNDS.toRectF(), debug_background);
+
+		for (int i = 0; i < console_history.size() && i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+25<WINSIZE->bottom-50; i++) {
+			ConsoleLine line = console_history[i];
+			ID2D1SolidColorBrush* color = line.getOwner()==0?ORANGE_b:WHITE_b;
+			
+			pRT->DrawTextA(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+20, WINSIZE->right-40,i*(CONSOLE_TEXT_SIZE+CONSOLE_TEXT_SPACING)+CONSOLE_TEXT_SIZE+20), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			}
+
+		pRT->DrawTextA(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, WINSIZE->bottom-20-CONSOLE_TEXT_SIZE, WINSIZE->right-40,WINSIZE->bottom-20), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
 
 
+	//draw pointer and level designer stuff
+	if(editmode==0)
 	pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), RED_b, 2);
-
+	else if(editmode==1)
+	pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), BLACK_b, 2);
+	
 	if(firstpoint_b==false){
-		pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), Peripherals::mousePos().P2F(), RED_b, 4);
+		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+		Point p2 = schemToLocalPoint(p1);
+		if(editmode==0){
+			pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), p2.P2F(), RED_b, 4);
+		}else if(editmode==1){
+			pRT->DrawRectangle(X::Rect(schemToLocalPoint(firstpoint), p2).toRectF(), RED_b, 4);
+		}
+	}
+
+	if(editmode==1){
+		wstring str = L"";
+		str+=std::to_wstring(select_z);
+		pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400,40), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
 }
 
@@ -210,6 +242,7 @@ void Application::tick(long tick) {
 }
 
 void InputProcessing(){
+	//CONSOLE PROCESSING
 	if(console_toggle && Peripherals::keyPressed(0xC0)){//~
 		console_toggle = false;
 		console_up = !console_up;
@@ -242,8 +275,9 @@ void InputProcessing(){
 		current_command+=Peripherals::unloadQueue();
 	}
 
-	if(Peripherals::mouseClicked()){
-		X::Point m = Peripherals::mouseClickPos();
+	//CLICK PROCESSING
+	if(Peripherals::mouseClickedLeft()){
+		X::Point m = Peripherals::mouseClickLeftPos();
 		if (firstpoint_b){
 			firstpoint = X::Point(round((m.getX() + location.getX()) / GRIDSIZE), round((m.getY() + location.getY()) / GRIDSIZE));
 			firstpoint_b = false;
@@ -254,11 +288,38 @@ void InputProcessing(){
 			X::Point topleft = X::Point(min(firstpoint.getX(), secondpoint.getX()), min(firstpoint.getY(), secondpoint.getY()));
 			X::Point bottomright = X::Point(max(firstpoint.getX(), secondpoint.getX()), max(firstpoint.getY(), secondpoint.getY()));
 
-			GameObject* r = new GameObject(topleft, bottomright, true);
-			newcolliders.push_back(r);
-			colliders.push_back(r);
+			if(editmode==0){
+				GameObject* r = new GameObject(topleft, bottomright, true);
+				newcolliders.push_back(r);
+				colliders.push_back(r);
+			}else if(editmode==1){
+				//X::Rect((r.left()*GRIDSIZE-location.getX()*z), r.top()*GRIDSIZE-location.getY()*z,(r.left()*GRIDSIZE-location.getX()*z)+((r.right()-r.left())*GRIDSIZE),r.top()*GRIDSIZE-location.getY()*z+((r.bottom()-r.top())*GRIDSIZE));
+				LevelProp* p = new LevelProp(X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), select_z);
+				newprops.push_back(p);
+				props.push_back(p);
+			}
 			firstpoint_b = true;
 		}
+	}
+	if(Peripherals::mouseClickedRight()){
+		if(editmode>=1)
+		editmode = 0;
+		else
+		editmode++;
+	}
+
+	//SELECT_Z
+	if(select_z_toggle){
+		select_z_toggle = false;
+	if(Peripherals::keyPressed(VK_ADD)){
+		select_z+=0.5;
+	}else if(Peripherals::keyPressed(VK_SUBTRACT)){
+		select_z-=0.5;
+	}
+	}
+	
+	if(!Peripherals::keyPressed(VK_ADD)&&!Peripherals::keyPressed(VK_SUBTRACT)){
+		select_z_toggle = true;
 	}
 }
 
@@ -282,11 +343,24 @@ void Application::InitResources(ID2D1HwndRenderTarget* pRT, IDWriteFactory* pDWr
         L"en-us",
         &console_txt
         );
+	pDWriteFactory->CreateTextFormat(
+        L"Arial",                // Font family name.
+        NULL,                       // Font collection (NULL sets it to use the system font collection).
+        DWRITE_FONT_WEIGHT_REGULAR,
+        DWRITE_FONT_STYLE_NORMAL,
+        DWRITE_FONT_STRETCH_NORMAL,
+        12,
+        L"en-us",
+        &debug_txt
+        );
 	//pRT->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &GREEN_b);
 }
 void Application::DeinitResources() {
 	for(GameObject * obj : colliders){
 		delete obj;
+	}
+	for(LevelProp * p : props){
+		delete p;
 	}
 
 	SafeRelease(BLACK_b);
@@ -296,6 +370,7 @@ void Application::DeinitResources() {
 	SafeRelease(ORANGE_b);
 	SafeRelease(debug_background);
 	SafeRelease(console_txt);
+	SafeRelease(debug_txt);
 }
 
 Application::Application(HWND hWnd) {
@@ -307,6 +382,10 @@ Application::Application(HWND hWnd) {
 	GameObject* o1 = new GameObject(X::Point(2,2), X::Point(7,2), true);
 	colliders.push_back(o);
 	colliders.push_back(o1);
+
+	// LevelProp* p = new LevelProp(X::Point(5,4), X::Point(7,6), 2);
+
+	// props.push_back(p);
 }
 
 void Application::onResize(int width, int height){
@@ -317,6 +396,13 @@ void Application::onResize(int width, int height){
 X::Rect schemToLocal(X::Rect r){
 	///multiply by GRIDSIZE, subtract camera location
 	return X::Rect(r.left()*GRIDSIZE-location.getX(), r.top()*GRIDSIZE-location.getY(),r.right()*GRIDSIZE-location.getX(),r.bottom()*GRIDSIZE-location.getY());
+}
+
+X::Rect schemToLocalZ(X::Rect r, double z, int width, int height){
+	return X::Rect(r.left()*GRIDSIZE*z-(location.getX()+width/2)*z+width/2+(z-1)*PLAYER_SIZE/2, 
+	r.top()*GRIDSIZE*z-(location.getY()+height/2)*z+height/2+(z-1)*PLAYER_SIZE/2,
+	r.left()*GRIDSIZE*z-(location.getX()+width/2)*z+((r.right()-r.left())*GRIDSIZE)+width/2+(z-1)*PLAYER_SIZE/2,
+	r.top()*GRIDSIZE*z-(location.getY()+height/2)*z+((r.bottom()-r.top())*GRIDSIZE)+height/2+(z-1)*PLAYER_SIZE/2);
 }
 
 X::Point schemToLocalPoint(X::Point r){
