@@ -33,9 +33,13 @@ double vertical_velocity = 0;
 bool console_up = false;
 bool console_toggle = true;
 bool backspace_toggle = true;
-wstring current_command = L"some text1";
+wstring current_command = L"";
+X::Point firstpoint = X::Point();
+X::Point secondpoint = X::Point();
+bool firstpoint_b = true;
 
 X::Rect schemToLocal(X::Rect r);
+X::Point schemToLocalPoint(X::Point r);
 class ConsoleLine {
 	wstring text;
 	int owner;
@@ -44,9 +48,12 @@ class ConsoleLine {
 	wstring getText();
 	int getOwner();
 };
+void InputProcessing();
 
 vector<ConsoleLine> console_history = vector<ConsoleLine>();
 vector<GameObject*> colliders = vector<GameObject*>();
+
+vector<GameObject*> newcolliders = vector<GameObject*>();
 
 X::Rect PLAYER_SCREEN_LOC;
 X::Rect SCREEN_BOUNDS;
@@ -109,6 +116,10 @@ void Application::Paint(ID2D1HwndRenderTarget* pRT) {
 
 
 	pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), RED_b, 2);
+
+	if(firstpoint_b==false){
+		pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), Peripherals::mousePos().P2F(), RED_b, 4);
+	}
 }
 
 void Application::tick(long tick) {
@@ -116,37 +127,7 @@ void Application::tick(long tick) {
 	// bool pressed = Peripherals::keyPressed(0x41);
 	// if(pressed)
 	// x1 += 4;
-	if(console_toggle && Peripherals::keyPressed(0xC0)){//~
-		console_toggle = false;
-		console_up = !console_up;
-		Peripherals::queueState(console_up);
-
-		if(!console_up)
-			current_command.clear();
-	}else
-	if(!Peripherals::keyPressed(0xC0))
-		console_toggle = true;
-
-	if(backspace_toggle&& Peripherals::keyPressed(VK_BACK) && current_command.length()>0){
-		backspace_toggle = false;
-		current_command.pop_back();
-	}
-
-	if(!Peripherals::keyPressed(VK_BACK)){
-		backspace_toggle = true;
-	}
-
-	if(Peripherals::keyPressed(VK_RETURN) && current_command.length()>0){
-		wstring ret = runConsoleCommand(current_command);
-		console_history.push_back(ConsoleLine(1, current_command));
-		if(ret.length()>0)
-		console_history.push_back(ConsoleLine(0, ret));
-		current_command = L"";
-		Peripherals::unloadQueue();
-	}else
-	if(Peripherals::queueUpdate()){
-		current_command+=Peripherals::unloadQueue();
-	}
+	InputProcessing();
 
 	if(console_up)
 		return;
@@ -228,6 +209,59 @@ void Application::tick(long tick) {
 	
 }
 
+void InputProcessing(){
+	if(console_toggle && Peripherals::keyPressed(0xC0)){//~
+		console_toggle = false;
+		console_up = !console_up;
+		Peripherals::queueState(console_up);
+
+		if(!console_up)
+			current_command.clear();
+	}else
+	if(!Peripherals::keyPressed(0xC0))
+		console_toggle = true;
+
+	if(backspace_toggle&& Peripherals::keyPressed(VK_BACK) && current_command.length()>0){
+		backspace_toggle = false;
+		current_command.pop_back();
+	}
+
+	if(!Peripherals::keyPressed(VK_BACK)){
+		backspace_toggle = true;
+	}
+
+	if(Peripherals::keyPressed(VK_RETURN) && current_command.length()>0){
+		wstring ret = runConsoleCommand(current_command);
+		console_history.push_back(ConsoleLine(1, current_command));
+		if(ret.length()>0)
+		console_history.push_back(ConsoleLine(0, ret));
+		current_command = L"";
+		Peripherals::unloadQueue();
+	}else
+	if(Peripherals::queueUpdate()){
+		current_command+=Peripherals::unloadQueue();
+	}
+
+	if(Peripherals::mouseClicked()){
+		X::Point m = Peripherals::mouseClickPos();
+		if (firstpoint_b){
+			firstpoint = X::Point(round((m.getX() + location.getX()) / GRIDSIZE), round((m.getY() + location.getY()) / GRIDSIZE));
+			firstpoint_b = false;
+		}
+		else {
+			secondpoint = X::Point(round((m.getX() + location.getX()) / GRIDSIZE), round((m.getY() + location.getY()) / GRIDSIZE));
+
+			X::Point topleft = X::Point(min(firstpoint.getX(), secondpoint.getX()), min(firstpoint.getY(), secondpoint.getY()));
+			X::Point bottomright = X::Point(max(firstpoint.getX(), secondpoint.getX()), max(firstpoint.getY(), secondpoint.getY()));
+
+			GameObject* r = new GameObject(topleft, bottomright, true);
+			newcolliders.push_back(r);
+			colliders.push_back(r);
+			firstpoint_b = true;
+		}
+	}
+}
+
 #define BRUSH(y, x)pRT->CreateSolidColorBrush(D2D1::ColorF(x),y);
 void Application::InitResources(ID2D1HwndRenderTarget* pRT, IDWriteFactory* pDWriteFactory) {
 	BRUSH(&BLACK_b, D2D1::ColorF::Black);
@@ -283,6 +317,11 @@ void Application::onResize(int width, int height){
 X::Rect schemToLocal(X::Rect r){
 	///multiply by GRIDSIZE, subtract camera location
 	return X::Rect(r.left()*GRIDSIZE-location.getX(), r.top()*GRIDSIZE-location.getY(),r.right()*GRIDSIZE-location.getX(),r.bottom()*GRIDSIZE-location.getY());
+}
+
+X::Point schemToLocalPoint(X::Point r){
+	///multiply by GRIDSIZE, subtract camera location
+	return X::Point(r.getX()*GRIDSIZE-location.getX(), r.getY()*GRIDSIZE-location.getY());
 }
 
 ConsoleLine::ConsoleLine(int owner, wstring text) {

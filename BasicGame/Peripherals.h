@@ -12,6 +12,9 @@ class Peripherals
 	static std::unordered_map<WPARAM, bool> key_reg;
 	static int mousex;
 	static int mousey;
+	static bool mouseclicked;
+	static int mouseclick_x;
+	static int mouseclick_y;
 public:
 	
 	static bool keyPressed(WPARAM);
@@ -22,4 +25,7 @@ public:
 	static void queueState(bool);
 	static bool queueUpdate();
 	static X::Point mousePos();
+	static void mouseClickIn(int x, int y);
+	static bool mouseClicked();
+	static X::Point mouseClickPos();
 };

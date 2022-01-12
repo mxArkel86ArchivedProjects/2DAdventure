@@ -19,6 +19,7 @@ namespace X {
 		Point multiply(double d);
 		Point add(Point p);
 		D2D1_POINT_2F P2F();
+		static Point Empty();
 	};
 	class Rect {
 	protected:

@@ -7,6 +7,9 @@ bool Peripherals::queuestate = false;
 bool Peripherals::queueupdate = false;
 int Peripherals::mousex = 0;
 int Peripherals::mousey = 0;
+int Peripherals::mouseclick_x = 0;
+int Peripherals::mouseclick_y = 0;
+bool Peripherals::mouseclicked = false;
 
 void Peripherals::KeyPressIn(WPARAM p, bool type) {
 	if(queuestate&&type&&p!=0xC0 &&p!=VK_BACK){
@@ -42,6 +45,26 @@ void Peripherals::MouseMoveIn(int x, int y){
 	Peripherals::mousex = x;
 	Peripherals::mousey = y;
 }
+
+void Peripherals::mouseClickIn(int x, int y){
+	mouseclick_x = x;
+	mouseclick_y = y;
+	mouseclicked = true;
+}
+
+bool Peripherals::mouseClicked(){
+	if(mouseclicked){
+		mouseclicked = false;
+		return true;
+	}
+	return false;
+}
+
+
 X::Point Peripherals::mousePos(){
 	return X::Point(Peripherals::mousex, Peripherals::mousey);
+}
+
+X::Point Peripherals::mouseClickPos(){
+	return X::Point(mouseclick_x, mouseclick_y);
 }
