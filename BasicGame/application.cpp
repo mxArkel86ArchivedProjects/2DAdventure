@@ -71,7 +71,7 @@ void Application::Paint(ID2D1HwndRenderTarget* pRT) {
 	pRT->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
 	
-	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), RED_b);
+	
 
 	for (int y = 0; y < 20; y++) {
 		for (int x = 0; x < 20; x++) {
@@ -85,6 +85,7 @@ void Application::Paint(ID2D1HwndRenderTarget* pRT) {
 		}
 	}
 
+	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), RED_b);
 
 	for(GameObject* collider : colliders){
 		Rect r = collider->getRect();
@@ -105,6 +106,9 @@ void Application::Paint(ID2D1HwndRenderTarget* pRT) {
 	
 	pRT->DrawTextA(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, WINSIZE->bottom-20-CONSOLE_TEXT_SIZE, WINSIZE->right-40,WINSIZE->bottom-20), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
+
+
+	pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), RED_b, 2);
 }
 
 void Application::tick(long tick) {
@@ -247,6 +251,10 @@ void Application::InitResources(ID2D1HwndRenderTarget* pRT, IDWriteFactory* pDWr
 	//pRT->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &GREEN_b);
 }
 void Application::DeinitResources() {
+	for(GameObject * obj : colliders){
+		delete obj;
+	}
+
 	SafeRelease(BLACK_b);
 	SafeRelease(WHITE_b);
 	SafeRelease(RED_b);
@@ -262,7 +270,9 @@ Application::Application(HWND hWnd) {
 	onResize(WINSIZE->right, WINSIZE->bottom);
 
 	GameObject* o = new GameObject(X::Point(1,1), X::Point(4,1), true);
+	GameObject* o1 = new GameObject(X::Point(2,2), X::Point(7,2), true);
 	colliders.push_back(o);
+	colliders.push_back(o1);
 }
 
 void Application::onResize(int width, int height){

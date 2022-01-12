@@ -70,3 +70,7 @@ X::Rect::Rect(double left, double top, double right, double bottom){
 	this->topleft = X::Point(left, top);
 	this->bottomright = X::Point(right, bottom);
 }
+
+D2D1_POINT_2F X::Point::P2F(){
+	return D2D1::Point2F(x, y);
+}

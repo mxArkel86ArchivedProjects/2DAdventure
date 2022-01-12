@@ -143,7 +143,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
         Peripherals::KeyPressIn(wParam, false);
         break;
     }
-    
+    case WM_MOUSEMOVE:
+    {
+        UINT x = LOWORD(lParam);
+        UINT y = HIWORD(lParam);
+        Peripherals::MouseMoveIn(x, y);
+        break;
+    }
     case WM_TIMER:
     {
         switch (wParam)

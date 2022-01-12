@@ -5,6 +5,8 @@ std::wstringstream Peripherals::characterqueue = std::wstringstream();
 
 bool Peripherals::queuestate = false;
 bool Peripherals::queueupdate = false;
+int Peripherals::mousex = 0;
+int Peripherals::mousey = 0;
 
 void Peripherals::KeyPressIn(WPARAM p, bool type) {
 	if(queuestate&&type&&p!=0xC0 &&p!=VK_BACK){
@@ -34,4 +36,12 @@ void Peripherals::queueState(bool b){
 
 bool Peripherals::queueUpdate(){
 	return queueupdate;
+}
+
+void Peripherals::MouseMoveIn(int x, int y){
+	Peripherals::mousex = x;
+	Peripherals::mousey = y;
+}
+X::Point Peripherals::mousePos(){
+	return X::Point(Peripherals::mousex, Peripherals::mousey);
 }
