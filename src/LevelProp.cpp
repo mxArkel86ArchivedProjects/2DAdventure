@@ -4,7 +4,7 @@ LevelProp::LevelProp(){
 
 }
 LevelProp::LevelProp(string res, X::Point topleft, X::Point bottomright, double z){
-    rect = X::Rect(topleft, bottomright);
+    rect_ = X::Rect(topleft, bottomright);
     this->z = z;
     this->res_ = res;
 }
@@ -14,4 +14,8 @@ string LevelProp::res(){
 
 double LevelProp::getZ(){
     return z;
+}
+
+X::Rect LevelProp::rect(){
+    return rect_;
 }

@@ -33,6 +33,9 @@ IDWriteTextFormat *console_txt;
 IDWriteTextFormat *debug_txt;
 ID2D1Bitmap *bitmap;
 
+using convert_type = std::codecvt_utf8<wchar_t>;
+std::wstring_convert<convert_type, wchar_t> converter;
+
 #define PLAYER_SIZE 80
 #define GRIDSIZE 40
 #define PLAYER_SPEED 2
@@ -56,6 +59,7 @@ int editmode = 0;
 double select_z = 1;
 bool select_z_toggle = true;
 wstring APP_PATH = L"C:\\Users\\nicho\\source\\repos\\BasicGame\\build\\BasicGame\\Debug";
+string currentasset = "pat";
 
 std::unordered_map<string, ID2D1Bitmap *> resources = std::unordered_map<string, ID2D1Bitmap *>();
 
@@ -72,10 +76,7 @@ ID2D1Bitmap *getResource(string name)
 	return resources[name];
 }
 
-inline string joinpath(string x, string y)
-{
-	return x + y;
-}
+void saveconfig();
 
 X::Rect schemToLocalZ(X::Rect r, double z, int width, int height);
 X::Rect schemToLocal(X::Rect r);
@@ -109,6 +110,8 @@ inline bool strcompare(const wchar_t *a, const wchar_t *b)
 
 wstring runConsoleCommand(wstring cmd)
 {
+	vector<wstring> args; // #2: Search for tokens
+	split(args, cmd, is_any_of(" "), token_compress_on);
 	if (strcompare(cmd.c_str(), L"clip"))
 	{
 		noclip = !noclip;
@@ -119,6 +122,18 @@ wstring runConsoleCommand(wstring cmd)
 	{
 		console_history.clear();
 		return L"Successfully cleared console";
+	}else
+	if (strcompare(cmd.c_str(), L"save"))
+	{
+		saveconfig();
+		return L"Successfully saved assets";
+	}else
+	if (starts_with(cmd, "asset"))
+	{
+		wstring ws = args[1];
+		currentasset = converter.to_bytes(ws);
+		wstring str = L"Set current asset to " + args[1];
+		return str;
 	}
 	else
 		return L"";
@@ -148,15 +163,38 @@ void Application::Paint(ID2D1HwndRenderTarget *pRT)
 		Rect r = collider->getRect();
 
 		X::Rect obj = schemToLocal(collider->getRect());
-		pRT->DrawRectangle(obj.toRectF(), RED_b, 4);
+		pRT->DrawRectangle(obj.toRectF(), BLACK_b, 4);
 	}
 
 	for (LevelProp *p : props)
 	{
-		Rect r = p->rect;
-
+		Rect r = p->rect();
+		if(getResource(p->res())!=NULL){
 		X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+		
 		pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
+		}
+		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
+
+	for (GameObject *collider : newcolliders)
+	{
+		Rect r = collider->getRect();
+
+		X::Rect obj = schemToLocal(collider->getRect());
+		pRT->DrawRectangle(obj.toRectF(), GREEN_b, 4);
+	}
+
+	for (LevelProp *p : newprops)
+	{
+		Rect r = p->rect();
+		X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+		if(getResource(p->res())!=NULL){
+		pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
+		pRT->DrawRectangle(obj.toRectF(), GREEN_b, 4);
+		}else{
+			pRT->DrawRectangle(obj.toRectF(), RED_b, 4);
+		}
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 
@@ -305,11 +343,23 @@ void Application::tick(long tick)
 
 void saveconfig()
 {
-	ofstream myfile("example.txt");
+	ofstream myfile(APP_PATH + L"\\output.txt");
 	if (myfile.is_open())
 	{
-		myfile << "This is a line.\n";
-		myfile << "This is another line.\n";
+		myfile << "--Collisions--\n";
+		for(GameObject* o : newcolliders){
+			Rect r = o->getRect();
+			myfile<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<"\n";
+		}
+
+		myfile << "--assets--\n";
+		for(LevelProp* p : newprops){
+			Rect r = p->rect();
+			myfile<<"pat,"<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<","<<to_string(p->getZ())<<"\n";
+		}
+		newcolliders.clear();
+		newprops.clear();
+
 		myfile.close();
 	}
 	else
@@ -318,10 +368,10 @@ void saveconfig()
 }
 
 string category;
-void readconfig()
+void readconfig(wstring path)
 {
 	string line;
-	ifstream myfile(APP_PATH + L"\\example.txt");
+	ifstream myfile(APP_PATH + path);
 	if (myfile.is_open())
 	{
 		while (getline(myfile, line))
@@ -329,7 +379,7 @@ void readconfig()
 			
 			if (starts_with(line, "["))
 			{ // new category
-				category = line.substr(1, line.length() - 1);
+				category = line.substr(1, line.length() - 2);
 				continue;
 			}
 			if (category == "nul")
@@ -350,9 +400,24 @@ void readconfig()
 				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
 				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
 
-				X::Rect r = X::Rect(topleft.getX(), topleft.getY(), max(0, (bottomright.getX() - topleft.getY())),
-									max(0, (bottomright.getY() - topleft.getY())));
-				colliders.push_back(new GameObject(r.topLeft(), r.bottomRight(), true));
+				colliders.push_back(new GameObject(topleft, bottomright, true));
+			}else
+			if(category=="assets")
+			{
+
+				vector<string> SplitVec; // #2: Search for tokens
+				split(SplitVec, line, is_any_of(","), token_compress_on);
+				string asset = SplitVec[0];
+				double x1 = std::stod(SplitVec[1]);
+				double y1 = std::stod(SplitVec[2]);
+				double x2 = std::stod(SplitVec[3]);
+				double y2 = std::stod(SplitVec[4]);
+				double z = std::stod(SplitVec[5]);
+
+				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
+				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
+
+				props.push_back(new LevelProp(asset,topleft, bottomright, z));
 			}
 			else if(category=="player")
 			{
@@ -368,7 +433,7 @@ void readconfig()
 
 					double x1 = std::stod(SplitVec2[0]) * GRIDSIZE - SCREEN_BOUNDS.right() / 2 + PLAYER_SIZE;
 					double y1 = (std::stod(SplitVec2[1]) + 1) * GRIDSIZE - SCREEN_BOUNDS.bottom() / 2;
-					location = X::Point(x1, y1);
+					//location = X::Point(x1, y1);
 				}
 			}
 		}
@@ -436,14 +501,12 @@ void InputProcessing()
 			{
 				GameObject *r = new GameObject(topleft, bottomright, true);
 				newcolliders.push_back(r);
-				colliders.push_back(r);
 			}
 			else if (editmode == 1)
 			{
 				//X::Rect((r.left()*GRIDSIZE-location.getX()*z), r.top()*GRIDSIZE-location.getY()*z,(r.left()*GRIDSIZE-location.getX()*z)+((r.right()-r.left())*GRIDSIZE),r.top()*GRIDSIZE-location.getY()*z+((r.bottom()-r.top())*GRIDSIZE));
-				LevelProp *p = new LevelProp("pat", X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), select_z);
+				LevelProp *p = new LevelProp(currentasset, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), select_z);
 				newprops.push_back(p);
-				props.push_back(p);
 			}
 			firstpoint_b = true;
 		}
@@ -483,7 +546,7 @@ void Application::InitResources(ID2D1HwndRenderTarget *pRT, IDWriteFactory *pDWr
 	BRUSH(&WHITE_b, D2D1::ColorF::White);
 	BRUSH(&RED_b, D2D1::ColorF::Red);
 	BRUSH(&GREEN_b, D2D1::ColorF::Green);
-	BRUSH(&ORANGE_b, D2D1::ColorF(255, 215, 0));
+	BRUSH(&ORANGE_b, D2D1::ColorF(255, 138, 0));
 	BRUSH(&debug_background, D2D1::ColorF(90, 90, 90, 0.6));
 
 	pDWriteFactory->CreateTextFormat(
@@ -519,6 +582,14 @@ void Application::DeinitResources()
 	{
 		delete p;
 	}
+	for (GameObject *obj : newcolliders)
+	{
+		delete obj;
+	}
+	for (LevelProp *p : newprops)
+	{
+		delete p;
+	}
 
 	for (std::pair<const std::string, ID2D1Bitmap *> b : resources)
 	{
@@ -542,10 +613,12 @@ Application::Application(HWND hWnd)
 	WINSIZE = (LPRECT)malloc(sizeof(LPRECT));
 	onResize(WINSIZE->right, WINSIZE->bottom);
 
-	GameObject *o = new GameObject(X::Point(1, 1), X::Point(4, 1), true);
-	GameObject *o1 = new GameObject(X::Point(2, 2), X::Point(7, 2), true);
-	colliders.push_back(o);
-	colliders.push_back(o1);
+	// GameObject *o = new GameObject(X::Point(1, 1), X::Point(4, 1), true);
+	// GameObject *o1 = new GameObject(X::Point(2, 2), X::Point(7, 2), true);
+	// colliders.push_back(o);
+	// colliders.push_back(o1);
+
+	readconfig(L"\\example.txt");
 }
 
 void Application::onResize(int width, int height)
