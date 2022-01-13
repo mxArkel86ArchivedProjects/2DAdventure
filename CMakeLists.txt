@@ -6,4 +6,6 @@ cmake_minimum_required (VERSION 3.8)
 project ("BasicGame")
 
 # Include sub-projects.
-add_subdirectory ("BasicGame")
+include_directories("deps")
+
+add_subdirectory ("src")

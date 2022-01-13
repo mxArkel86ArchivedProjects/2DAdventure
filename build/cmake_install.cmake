@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/nicho/source/repos/BasicGame/build/BasicGame/cmake_install.cmake")
+  include("C:/Users/nicho/source/repos/BasicGame/build/src/cmake_install.cmake")
 
 endif()
 

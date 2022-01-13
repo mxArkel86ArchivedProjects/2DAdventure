@@ -1,0 +1,10 @@
+^C:\USERS\NICHO\SOURCE\REPOS\BASICGAME\SRC\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/BasicGame -BC:/Users/nicho/source/repos/BasicGame/build --check-stamp-file C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

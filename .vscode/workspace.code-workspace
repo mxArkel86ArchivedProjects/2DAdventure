@@ -53,7 +53,17 @@
 			"xiosbase": "cpp",
 			"xlocale": "cpp",
 			"xlocinfo": "cpp",
-			"xlocnum": "cpp"
+			"xlocnum": "cpp",
+			"xlocbuf": "cpp",
+			"algorithm": "cpp",
+			"codecvt": "cpp",
+			"deque": "cpp",
+			"functional": "cpp",
+			"iostream": "cpp",
+			"locale": "cpp",
+			"xlocmes": "cpp",
+			"xlocmon": "cpp",
+			"xloctime": "cpp"
 		},
 		"cmake.cpptools.compilerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\Llvm\\x64\\bin"
 	}

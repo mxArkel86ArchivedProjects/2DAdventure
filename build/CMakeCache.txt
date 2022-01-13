@@ -15,13 +15,13 @@
 ########################
 
 //Value Computed by CMake
-BasicGame_BINARY_DIR:STATIC=C:/Users/nicho/source/repos/BasicGame/build/BasicGame
+BasicGame_BINARY_DIR:STATIC=C:/Users/nicho/source/repos/BasicGame/build/src
 
 //Value Computed by CMake
 BasicGame_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-BasicGame_SOURCE_DIR:STATIC=C:/Users/nicho/source/repos/BasicGame/BasicGame
+BasicGame_SOURCE_DIR:STATIC=C:/Users/nicho/source/repos/BasicGame/src
 
 //Path to a program.
 CMAKE_AR:FILEPATH=C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx86/x86/lib.exe
