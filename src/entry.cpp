@@ -6,8 +6,8 @@
 
 #pragma comment(lib, "d2d1")
 
-#define WIN_WIDTH 800
-#define WIN_HEIGHT 600
+#define WIN_WIDTH 1280
+#define WIN_HEIGHT 720
 
 #define TIMER1 1
 #define TIMER2 2

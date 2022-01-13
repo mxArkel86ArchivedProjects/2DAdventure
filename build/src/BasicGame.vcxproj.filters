@@ -4,6 +4,9 @@
     <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,6 +30,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>

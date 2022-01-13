@@ -8,20 +8,16 @@
 #include <string>
 #include "LevelProp.h"
 #include "ImageUtil.h"
+#include "ConfigMgr.h"
 #include <iostream>
+
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/predicate.hpp"
-#include <fstream>
+using namespace boost;
+using namespace std;
 
 #include <codecvt>
 #include <locale>
-
-using std::string;
-using std::vector;
-using namespace std;
-using namespace boost;
-using std::ifstream;
-using std::ofstream;
 
 ID2D1SolidColorBrush *BLACK_b = NULL;
 ID2D1SolidColorBrush *WHITE_b = NULL;
@@ -36,9 +32,9 @@ ID2D1Bitmap *bitmap;
 using convert_type = std::codecvt_utf8<wchar_t>;
 std::wstring_convert<convert_type, wchar_t> converter;
 
-#define PLAYER_SIZE 80
-#define GRIDSIZE 40
-#define PLAYER_SPEED 2
+#define PLAYER_SIZE 100
+#define GRIDSIZE 30
+#define PLAYER_SPEED 2.2
 #define GRAV_CONST 0.1
 #define JUMP_INTENSITY 4
 #define CONSOLE_TEXT_SIZE 16
@@ -75,8 +71,6 @@ ID2D1Bitmap *getResource(string name)
 {
 	return resources[name];
 }
-
-void saveconfig();
 
 X::Rect schemToLocalZ(X::Rect r, double z, int width, int height);
 X::Rect schemToLocal(X::Rect r);
@@ -125,7 +119,7 @@ wstring runConsoleCommand(wstring cmd)
 	}else
 	if (strcompare(cmd.c_str(), L"save"))
 	{
-		saveconfig();
+		saveconfig(APP_PATH + L"\\output.txt", newcolliders, newprops, colliders, props);
 		return L"Successfully saved assets";
 	}else
 	if (starts_with(cmd, "asset"))
@@ -143,16 +137,20 @@ void Application::Paint(ID2D1HwndRenderTarget *pRT)
 {
 	pRT->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
-	for (int y = 0; y < 20; y++)
+	for (int y = 0; y < 100; y++)
 	{
-		for (int x = 0; x < 20; x++)
+		for (int x = 0; x < 100; x++)
 		{
 			X::Point coord(x, y);
 			coord.multiplySelf(GRIDSIZE);
 			coord.addDotSelf(location.multiply(-1));
 
-			pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX(), coord.getIY() + GRIDSIZE), GREEN_b, 1);
-			pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX() + GRIDSIZE, coord.getIY()), GREEN_b, 1);
+			if(CollisionUtil::staticCollision(X::Rect(coord, X::Point(coord.getX()+GRIDSIZE, coord.getY()+GRIDSIZE)), SCREEN_BOUNDS)){
+				pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX(), coord.getIY() + GRIDSIZE), GREEN_b, 1);
+				pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX() + GRIDSIZE, coord.getIY()), GREEN_b, 1);
+			}
+
+			
 		}
 	}
 
@@ -161,8 +159,10 @@ void Application::Paint(ID2D1HwndRenderTarget *pRT)
 	for (GameObject *collider : colliders)
 	{
 		Rect r = collider->getRect();
-
 		X::Rect obj = schemToLocal(collider->getRect());
+		if(!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+			continue;
+
 		pRT->DrawRectangle(obj.toRectF(), BLACK_b, 4);
 	}
 
@@ -171,29 +171,9 @@ void Application::Paint(ID2D1HwndRenderTarget *pRT)
 		Rect r = p->rect();
 		if(getResource(p->res())!=NULL){
 		X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
-		
+		if(!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+			continue;
 		pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
-		}
-		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
-	}
-
-	for (GameObject *collider : newcolliders)
-	{
-		Rect r = collider->getRect();
-
-		X::Rect obj = schemToLocal(collider->getRect());
-		pRT->DrawRectangle(obj.toRectF(), GREEN_b, 4);
-	}
-
-	for (LevelProp *p : newprops)
-	{
-		Rect r = p->rect();
-		X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
-		if(getResource(p->res())!=NULL){
-		pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
-		pRT->DrawRectangle(obj.toRectF(), GREEN_b, 4);
-		}else{
-			pRT->DrawRectangle(obj.toRectF(), RED_b, 4);
 		}
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
@@ -240,10 +220,6 @@ void Application::Paint(ID2D1HwndRenderTarget *pRT)
 		str += std::to_wstring(select_z);
 		pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), BLACK_b, D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
-
-	const D2D1_RECT_F dest = D2D1::RectF(200, 200, 400, 400);
-	const D2D1_RECT_F src = D2D1::RectF(0, 0, 256, 256);
-	pRT->DrawBitmap(getResource("pat"), PLAYER_SCREEN_LOC.toRectF(), FLOAT(1.0f));
 }
 
 void Application::tick(long tick)
@@ -300,7 +276,8 @@ void Application::tick(long tick)
 		for (GameObject *r : colliders)
 		{
 			X::Rect obj = schemToLocal(r->getRect());
-
+			if(!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+				continue;
 			CollisionReturn ret = CollisionUtil::DynamicCollision(PLAYER_SCREEN_LOC, obj, movex, movey);
 			if (ret.y_collision)
 			{
@@ -341,105 +318,7 @@ void Application::tick(long tick)
 	location.addDotSelf(X::Point(movex, 0));
 }
 
-void saveconfig()
-{
-	ofstream myfile(APP_PATH + L"\\output.txt");
-	if (myfile.is_open())
-	{
-		myfile << "--Collisions--\n";
-		for(GameObject* o : newcolliders){
-			Rect r = o->getRect();
-			myfile<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<"\n";
-		}
 
-		myfile << "--assets--\n";
-		for(LevelProp* p : newprops){
-			Rect r = p->rect();
-			myfile<<"pat,"<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<","<<to_string(p->getZ())<<"\n";
-		}
-		newcolliders.clear();
-		newprops.clear();
-
-		myfile.close();
-	}
-	else
-		cout << "Unable to open file";
-	return;
-}
-
-string category;
-void readconfig(wstring path)
-{
-	string line;
-	ifstream myfile(APP_PATH + path);
-	if (myfile.is_open())
-	{
-		while (getline(myfile, line))
-		{
-			
-			if (starts_with(line, "["))
-			{ // new category
-				category = line.substr(1, line.length() - 2);
-				continue;
-			}
-			if (category == "nul")
-				continue;
-			if (starts_with(line, "#") || line.length() == 0)
-				continue;
-
-			if(category=="collisions")
-			{
-
-				vector<string> SplitVec; // #2: Search for tokens
-				split(SplitVec, line, is_any_of(","), token_compress_on);
-				double x1 = std::stod(SplitVec[0]);
-				double y1 = std::stod(SplitVec[1]);
-				double x2 = std::stod(SplitVec[2]);
-				double y2 = std::stod(SplitVec[3]);
-
-				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
-				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
-
-				colliders.push_back(new GameObject(topleft, bottomright, true));
-			}else
-			if(category=="assets")
-			{
-
-				vector<string> SplitVec; // #2: Search for tokens
-				split(SplitVec, line, is_any_of(","), token_compress_on);
-				string asset = SplitVec[0];
-				double x1 = std::stod(SplitVec[1]);
-				double y1 = std::stod(SplitVec[2]);
-				double x2 = std::stod(SplitVec[3]);
-				double y2 = std::stod(SplitVec[4]);
-				double z = std::stod(SplitVec[5]);
-
-				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
-				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
-
-				props.push_back(new LevelProp(asset,topleft, bottomright, z));
-			}
-			else if(category=="player")
-			{
-				vector<string> SplitVec; // #2: Search for tokens
-				split(SplitVec, line, is_any_of("="), token_compress_on);
-				string key = SplitVec[0];
-				string val = SplitVec[1];
-				if (key._Equal("ipos"))
-				{
-
-					vector<string> SplitVec2; // #2: Search for tokens
-					split(SplitVec2, val, is_any_of(","), token_compress_on);
-
-					double x1 = std::stod(SplitVec2[0]) * GRIDSIZE - SCREEN_BOUNDS.right() / 2 + PLAYER_SIZE;
-					double y1 = (std::stod(SplitVec2[1]) + 1) * GRIDSIZE - SCREEN_BOUNDS.bottom() / 2;
-					//location = X::Point(x1, y1);
-				}
-			}
-		}
-	}
-	myfile.close();
-}
 
 void InputProcessing()
 {
@@ -501,12 +380,14 @@ void InputProcessing()
 			{
 				GameObject *r = new GameObject(topleft, bottomright, true);
 				newcolliders.push_back(r);
+				colliders.push_back(r);
 			}
 			else if (editmode == 1)
 			{
 				//X::Rect((r.left()*GRIDSIZE-location.getX()*z), r.top()*GRIDSIZE-location.getY()*z,(r.left()*GRIDSIZE-location.getX()*z)+((r.right()-r.left())*GRIDSIZE),r.top()*GRIDSIZE-location.getY()*z+((r.bottom()-r.top())*GRIDSIZE));
 				LevelProp *p = new LevelProp(currentasset, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), select_z);
 				newprops.push_back(p);
+				props.push_back(p);
 			}
 			firstpoint_b = true;
 		}
@@ -525,11 +406,11 @@ void InputProcessing()
 		select_z_toggle = false;
 		if (Peripherals::keyPressed(VK_ADD))
 		{
-			select_z += 0.5;
+			select_z += 0.25;
 		}
 		else if (Peripherals::keyPressed(VK_SUBTRACT))
 		{
-			select_z -= 0.5;
+			select_z -= 0.25;
 		}
 	}
 
@@ -582,14 +463,6 @@ void Application::DeinitResources()
 	{
 		delete p;
 	}
-	for (GameObject *obj : newcolliders)
-	{
-		delete obj;
-	}
-	for (LevelProp *p : newprops)
-	{
-		delete p;
-	}
 
 	for (std::pair<const std::string, ID2D1Bitmap *> b : resources)
 	{
@@ -613,17 +486,12 @@ Application::Application(HWND hWnd)
 	WINSIZE = (LPRECT)malloc(sizeof(LPRECT));
 	onResize(WINSIZE->right, WINSIZE->bottom);
 
-	// GameObject *o = new GameObject(X::Point(1, 1), X::Point(4, 1), true);
-	// GameObject *o1 = new GameObject(X::Point(2, 2), X::Point(7, 2), true);
-	// colliders.push_back(o);
-	// colliders.push_back(o1);
-
-	readconfig(L"\\example.txt");
+	readconfig(APP_PATH + L"\\level.txt", colliders, props);
 }
 
 void Application::onResize(int width, int height)
 {
-	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - PLAYER_SIZE) / 2, (height - PLAYER_SIZE) / 2), X::Point((width + PLAYER_SIZE) / 2, (height + PLAYER_SIZE) / 2));
+	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - PLAYER_SIZE) / 2, height*0.65 - PLAYER_SIZE / 2), X::Point((width + PLAYER_SIZE) / 2, height*0.65 + PLAYER_SIZE / 2));
 	SCREEN_BOUNDS = X::Rect(X::Point(0, 0), X::Point(width, height));
 }
 
