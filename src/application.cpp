@@ -35,7 +35,7 @@ std::wstring_convert<convert_type, wchar_t> converter;
 #define JUMP_INTENSITY 4.7
 #define CONSOLE_TEXT_SIZE 16
 #define CONSOLE_TEXT_SPACING 4
-#define RESOURCE_SIZE 512
+#define RESOURCE_SIZE 9999
 
 X::Point location;
 double x1 = 0;
@@ -95,9 +95,9 @@ void Application::InitColor(string name, D2D1_COLOR_F color)
 	pRT->CreateSolidColorBrush(c, &br);
 	addColor(name, br);
 }
-void Application::InitBitmap(string name, wstring path){
+void Application::InitBitmap(string name, wstring path, int size){
 	ID2D1Bitmap *bitmap;
-	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(APP_PATH + path).c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap);
+	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(APP_PATH + path).c_str()), size, size, &bitmap);
 	addResource(name, bitmap);
 }
 
@@ -618,16 +618,16 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory)
 		&debug_txt);
 
 	
-	InitBitmap("pat", L"\\res\\image1.png");
-	InitBitmap("caveend1", L"\\res\\cave_end1.png");
-	InitBitmap("fadingcave", L"\\res\\fadingcave.png");
-	InitBitmap("cave1", L"\\res\\cave1.png");
-	InitBitmap("rock1", L"\\res\\rock1.png");
-	InitBitmap("rock2", L"\\res\\rock2.png");
-	InitBitmap("rock3", L"\\res\\rock3.png");
-	InitBitmap("crate", L"\\res\\crate.png");
-	InitBitmap("lamp", L"\\res\\lamp.png");
-	InitBitmap("pillar1", L"\\res\\pillar1.png");
+	InitBitmap("pat", L"\\res\\image1.png", min(RESOURCE_SIZE,1000));
+	InitBitmap("caveend1", L"\\res\\cave_end1.png", min(RESOURCE_SIZE,2000));
+	InitBitmap("fadingcave", L"\\res\\fadingcave.png", min(RESOURCE_SIZE,2000));
+	InitBitmap("cave1", L"\\res\\cave1.png", min(RESOURCE_SIZE,2000));
+	InitBitmap("rock1", L"\\res\\rock1.png", min(RESOURCE_SIZE,512));
+	InitBitmap("rock2", L"\\res\\rock2.png", min(RESOURCE_SIZE,512));
+	InitBitmap("rock3", L"\\res\\rock3.png", min(RESOURCE_SIZE,512));
+	InitBitmap("crate", L"\\res\\crate.png", min(RESOURCE_SIZE,512));
+	InitBitmap("lamp", L"\\res\\lamp.png", min(RESOURCE_SIZE,512));
+	InitBitmap("pillar1", L"\\res\\pillar1.png", min(RESOURCE_SIZE,2000));
 }
 void Application::DeinitResources()
 {

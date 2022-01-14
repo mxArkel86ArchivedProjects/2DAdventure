@@ -34,17 +34,41 @@ HRESULT LoadBitmapFromFile(
         // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
         hr = pIWICFactory->CreateFormatConverter(&pConverter);
     }
+    
 
-    if (SUCCEEDED(hr))
-    {
-        hr = pConverter->Initialize(
-            pSource,
-            GUID_WICPixelFormat32bppPBGRA,
-            WICBitmapDitherTypeNone,
-            NULL,
-            0.f,
-            WICBitmapPaletteTypeMedianCut);
-    }
+    hr = pIWICFactory->CreateBitmapScaler(&pScaler);
+				if (SUCCEEDED(hr))
+				{
+					hr = pScaler->Initialize(
+						pSource,
+						destinationWidth,
+						destinationHeight,
+						WICBitmapInterpolationModeCubic
+						);
+				}
+				if (SUCCEEDED(hr))
+				{
+					hr = pConverter->Initialize(
+						pScaler,
+						GUID_WICPixelFormat32bppPBGRA,
+						WICBitmapDitherTypeNone,
+						NULL,
+						0.f,
+						WICBitmapPaletteTypeMedianCut
+						);
+				}
+    // if (SUCCEEDED(hr))
+    // {
+    //     hr = pConverter->Initialize(
+    //         pSource,
+    //         GUID_WICPixelFormat32bppPBGRA,
+    //         WICBitmapDitherTypeNone,
+    //         NULL,
+    //         0.f,
+    //         WICBitmapPaletteTypeMedianCut);
+    // }
+
+
 
     if (SUCCEEDED(hr))
     {
@@ -56,16 +80,16 @@ HRESULT LoadBitmapFromFile(
             ppBitmap);
     }
 
-    if(pDecoder!=NULL)
-    pDecoder->Release();
-    if(pSource!=NULL)
-    pSource->Release();
-    if(pStream!=NULL)
-    pStream->Release();
-    if(pConverter!=NULL)
-    pConverter->Release();
-    if(pScaler!=NULL)
-    pScaler->Release();
+    if (pDecoder != NULL)
+        pDecoder->Release();
+    if (pSource != NULL)
+        pSource->Release();
+    if (pStream != NULL)
+        pStream->Release();
+    if (pConverter != NULL)
+        pConverter->Release();
+    if (pScaler != NULL)
+        pScaler->Release();
 
     return hr;
 };
