@@ -1,7 +1,7 @@
 #include "ConfigMgr.h"
 #include <algorithm>
 
-void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelProp *>& newprops, vector<GameObject *>& colliders, vector<LevelProp *>& props)
+void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelProp *>& newprops, vector<ColorRect *> newcolorrect, vector<GameObject *>& colliders, vector<LevelProp *>& props, vector<ColorRect *>& colorrect)
 {
 	ofstream myfile(path);
 	if (myfile.is_open())
@@ -21,14 +21,25 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 		myfile << "--assets--\n";
 		for(LevelProp* p : newprops){
 			Rect r = p->rect();
-			myfile<<"pat,"<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<","<<to_string(p->getZ())<<"\n";
+			myfile<<p->res()<<","<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<","<<to_string(p->getZ())<<"\n";
 			std::vector<LevelProp *>::iterator position = std::find(props.begin(), props.end(), p);
 			if (position != props.end()) // == myVector.end() means the element was not found
     		props.erase(position);
 			delete p;
 		}
+
+		myfile << "--colorrect--\n";
+		for(ColorRect* p : newcolorrect){
+			Rect r = p->rect();
+			myfile<<p->getColor()<<","<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<"\n";
+			std::vector<ColorRect *>::iterator position = std::find(colorrect.begin(), colorrect.end(), p);
+			if (position != colorrect.end()) // == myVector.end() means the element was not found
+    		colorrect.erase(position);
+			delete p;
+		}
 		newcolliders.clear();
 		newprops.clear();
+		newcolorrect.clear();
 
 		myfile.close();
 	}
@@ -36,7 +47,7 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 }
 
 string category;
-void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp *>& props)
+void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp *>& props, vector<ColorRect *>& colorrect)
 {
 	string line;
 	ifstream myfile(path);
@@ -86,6 +97,22 @@ void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp 
 				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
 
 				props.push_back(new LevelProp(asset,topleft, bottomright, z));
+			}else
+			if(category=="colorrect")
+			{
+
+				vector<string> SplitVec; // #2: Search for tokens
+				split(SplitVec, line, is_any_of(","), token_compress_on);
+				string asset = SplitVec[0];
+				double x1 = std::stod(SplitVec[1]);
+				double y1 = std::stod(SplitVec[2]);
+				double x2 = std::stod(SplitVec[3]);
+				double y2 = std::stod(SplitVec[4]);
+
+				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
+				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
+
+				colorrect.push_back(new ColorRect(asset, topleft, bottomright));
 			}
 			else if(category=="player")
 			{

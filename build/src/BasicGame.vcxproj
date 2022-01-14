@@ -314,6 +314,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\entry.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.cpp" />
     <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.cpp" />
     <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.h" />
     <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.h" />

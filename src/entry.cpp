@@ -12,7 +12,7 @@
 #define TIMER1 1
 #define TIMER2 2
 
-static Application app = NULL;
+static Application app;
 static ID2D1HwndRenderTarget* pRT = NULL;
 static ID2D1Factory* pD2DFactory = NULL;
 static IDWriteFactory* pDWriteFactory;
@@ -94,8 +94,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         &pRT
     );
 
-    app = Application(hWnd);
-    app.InitResources(pRT, pDWriteFactory, pFactory);
+    app = Application(hWnd, pRT);
+    app.InitResources(pDWriteFactory, pFactory);
     
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
@@ -126,7 +126,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     {
         app.tick(tick++);
         pRT->BeginDraw();
-        app.Paint(pRT);
+        app.Paint();
         pRT->EndDraw();
         break;
     }
@@ -134,11 +134,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     {
         UINT width = LOWORD(lParam);
         UINT height = HIWORD(lParam);
+
         pRT->Resize(D2D1::SizeU(width, height));
         RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
 
-        GetClientRect(hWnd, app.WINSIZE);
-        app.onResize(app.WINSIZE->right, app.WINSIZE->bottom);
+        app.onResize(width, height);
         break;
     }
     case WM_KEYDOWN:

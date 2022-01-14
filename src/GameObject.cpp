@@ -11,3 +11,6 @@ id(this)
 Rect GameObject::getRect(){
     return rect;
 }
+GameObject* GameObject::operator&(){
+        return id;
+}

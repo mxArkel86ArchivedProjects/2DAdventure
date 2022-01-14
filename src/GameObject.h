@@ -10,8 +10,6 @@ class GameObject{
     Rect rect;
     public:
     GameObject(Point topleft, Point bottomright, bool collider);
-    GameObject* operator&(){
-        return id;
-    }
+    GameObject* operator&();
     Rect getRect();
 };
