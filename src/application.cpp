@@ -127,6 +127,10 @@ inline bool strcompare(const wchar_t *a, const wchar_t *b)
 	return _wcsnicmp(a, b, max(wcslen(a), wcslen(b))) == 0;
 }
 
+void sortAssets(){
+	
+}
+
 wstring Application::runConsoleCommand(wstring cmd)
 {
 	vector<wstring> args; // #2: Search for tokens
@@ -195,7 +199,7 @@ void Application::Paint()
 			X::Rect obj = schemToLocal(r);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
-		pRT->FillRectangle(obj.toRectF(), getColor(p->getColor()));
+		pRT->FillRectangle(obj.expanded(2).toRectF(), getColor(p->getColor()));
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 
@@ -232,7 +236,18 @@ void Application::Paint()
 		}
 	}
 	
-
+	for (LevelProp *p : props)
+	{
+		Rect r = p->rect();
+		if (getResource(p->res()) != NULL && p->getZ()<=1.000)
+		{
+			X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+				continue;
+			pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
+		}
+		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
 
 	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), getColor("red"));
 
@@ -250,7 +265,7 @@ void Application::Paint()
 	for (LevelProp *p : props)
 	{
 		Rect r = p->rect();
-		if (getResource(p->res()) != NULL)
+		if (getResource(p->res()) != NULL && p->getZ()>1.000)
 		{
 			X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
@@ -307,7 +322,7 @@ void Application::Paint()
 		}
 	}
 	if(DEBUGVIEW){
-	pRT->DrawRectangle(D2D1::RectF(SCREEN_BOUNDS.right() * 0.2, SCREEN_BOUNDS.bottom() * 0.2, SCREEN_BOUNDS.right() * 0.8, SCREEN_BOUNDS.bottom() * 0.8), getColor("red"), 6);
+	//pRT->DrawRectangle(D2D1::RectF(SCREEN_BOUNDS.right() * 0.2, SCREEN_BOUNDS.bottom() * 0.2, SCREEN_BOUNDS.right() * 0.8, SCREEN_BOUNDS.bottom() * 0.8), getColor("red"), 6);
 	}
 }
 
@@ -529,7 +544,7 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory, IWICImagingFacto
 	InitColor("green", D2D1::ColorF(D2D1::ColorF::Green));
 	InitColor("orange", D2D1::ColorF(D2D1::ColorF::Orange));
 	InitColor("debug_background", D2D1::ColorF(90, 90, 90, 0.6));
-	InitColor("cavegray", D2D1::ColorF(0x7f807f));
+	InitColor("cavegray", D2D1::ColorF(0x80807f));
 	InitColor("cavegraydark", D2D1::ColorF(0x2f302f));
 	
 
@@ -568,6 +583,21 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory, IWICImagingFacto
 	ID2D1Bitmap *bitmap4;
 	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap4);
 	addResource("rock1", bitmap4);
+	ID2D1Bitmap *bitmap5;
+	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock2.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap5);
+	addResource("rock2", bitmap5);
+	ID2D1Bitmap *bitmap6;
+	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock3.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap6);
+	addResource("rock3", bitmap6);
+	ID2D1Bitmap *bitmap7;
+	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\crate.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap7);
+	addResource("crate", bitmap7);
+	ID2D1Bitmap *bitmap8;
+	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\lamp.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap8);
+	addResource("lamp", bitmap8);
+	ID2D1Bitmap *bitmap9;
+	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\pillar1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap9);
+	addResource("pillar1", bitmap9);
 }
 void Application::DeinitResources()
 {

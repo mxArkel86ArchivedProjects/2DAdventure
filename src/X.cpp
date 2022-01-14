@@ -59,6 +59,9 @@ X::Point X::Rect::topLeft(){
 X::Point X::Rect::bottomRight(){
 			return bottomright;
 }
+X::Rect X::Rect::expanded(double amount){
+	return X::Rect(left()-amount, top()-amount,right()+amount,bottom()+amount);
+}
 X::Rect::Rect(){
 
 }

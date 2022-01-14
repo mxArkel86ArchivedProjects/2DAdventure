@@ -37,6 +37,7 @@ namespace X {
 		double right();
 		Point topLeft();
 		Point bottomRight();
+		Rect expanded(double);
 		D2D1_RECT_F toRectF();
 	};
 }

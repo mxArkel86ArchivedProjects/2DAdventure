@@ -46,9 +46,12 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 	return;
 }
 
+bool sortfunc (LevelProp* i,LevelProp* j) { return (i->getZ()<j->getZ()); }
+
 string category;
 void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp *>& props, vector<ColorRect *>& colorrect)
 {
+	vector<LevelProp *> temp = vector<LevelProp*>();
 	string line;
 	ifstream myfile(path);
 	if (myfile.is_open())
@@ -96,7 +99,7 @@ void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp 
 				X::Point topleft = X::Point(min(x1, x2), min(y1, y2));
 				X::Point bottomright = Point(max(x1, x2), max(y1, y2));
 
-				props.push_back(new LevelProp(asset,topleft, bottomright, z));
+				temp.push_back(new LevelProp(asset,topleft, bottomright, z));
 			}else
 			if(category=="colorrect")
 			{
@@ -134,4 +137,7 @@ void readconfig(wstring path, vector<GameObject *>& colliders, vector<LevelProp 
 		}
 	}
 	myfile.close();
+
+	std::sort (temp.begin(), temp.end(), sortfunc);
+	props.insert(props.begin(), temp.begin(), temp.end());
 }

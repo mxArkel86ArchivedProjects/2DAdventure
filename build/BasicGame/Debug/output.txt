@@ -1,5 +1,4 @@
 --Collisions--
 --assets--
-cave1,40,7,60,27,1.000000
+lamp,40,13,43,16,1.000000
 --colorrect--
-cavegray,42,3,73,7
