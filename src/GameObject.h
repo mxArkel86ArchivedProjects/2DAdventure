@@ -4,12 +4,11 @@
 using X::Rect;
 using X::Point;
 
-class GameObject{
+class GameObject : public X::Rect{
     GameObject* id;
     bool collider;
-    Rect rect;
     public:
     GameObject(Point topleft, Point bottomright, bool collider);
     GameObject* operator&();
-    Rect getRect();
+    operator X::Rect() const;
 };

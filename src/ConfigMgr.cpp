@@ -8,7 +8,7 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 	{
 		myfile << "--Collisions--\n";
 		for(GameObject* o : newcolliders){
-			Rect r = o->getRect();
+			Rect r = *o;
 			myfile<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<"\n";
 			
 			std::vector<GameObject *>::iterator position = std::find(colliders.begin(), colliders.end(), o);
@@ -20,7 +20,7 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 
 		myfile << "--assets--\n";
 		for(LevelProp* p : newprops){
-			Rect r = p->rect();
+			Rect r = *p;
 			myfile<<p->res()<<","<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<","<<to_string(p->getZ())<<"\n";
 			std::vector<LevelProp *>::iterator position = std::find(props.begin(), props.end(), p);
 			if (position != props.end()) // == myVector.end() means the element was not found
@@ -30,7 +30,7 @@ void saveconfig(wstring path, vector<GameObject *>& newcolliders, vector<LevelPr
 
 		myfile << "--colorrect--\n";
 		for(ColorRect* p : newcolorrect){
-			Rect r = p->rect();
+			Rect r = *p;
 			myfile<<p->getColor()<<","<<to_string((int)r.left())<<","<<to_string((int)r.top())<<","<<to_string((int)r.right())<<","<<to_string((int)r.bottom())<<"\n";
 			std::vector<ColorRect *>::iterator position = std::find(colorrect.begin(), colorrect.end(), p);
 			if (position != colorrect.end()) // == myVector.end() means the element was not found

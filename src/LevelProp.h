@@ -2,14 +2,13 @@
 #include "X.h"
 
 
-class LevelProp{
+class LevelProp : public X::Rect{
     double z;
     string res_;
     public:
-        X::Rect rect_;
         LevelProp();
         LevelProp(string res, X::Point topleft, X::Point bottomright, double z);
         double getZ();
         string res();
-        X::Rect rect();
+        operator X::Rect() const;
 };

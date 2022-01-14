@@ -80,3 +80,21 @@ D2D1_POINT_2F X::Point::P2F(){
 static X::Point Empty(){
 	return X::Point(0,0);
 }
+void X::Rect::setLeft(double d){
+	this->topleft.setX(d);
+}
+void X::Rect::setRight(double d){
+	this->bottomright.setX(d);
+}
+void X::Rect::setTop(double d){
+	this->topleft.setY(d);
+}
+void X::Rect::setBottom(double d){
+	this->bottomright.setY(d);
+}
+void X::Point::setX(double d){
+	x =d;
+}
+void X::Point::setY(double d){
+	y = d;
+}

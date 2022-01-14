@@ -31,8 +31,8 @@ std::wstring_convert<convert_type, wchar_t> converter;
 #define GRIDSIZE_ 40
 #define GRIDSIZE_DEBUG 30
 #define PLAYER_SPEED 2.2
-#define GRAV_CONST 0.11
-#define JUMP_INTENSITY 3.8
+#define GRAV_CONST 0.13
+#define JUMP_INTENSITY 4.7
 #define CONSOLE_TEXT_SIZE 16
 #define CONSOLE_TEXT_SPACING 4
 #define RESOURCE_SIZE 512
@@ -95,6 +95,11 @@ void Application::InitColor(string name, D2D1_COLOR_F color)
 	pRT->CreateSolidColorBrush(c, &br);
 	addColor(name, br);
 }
+void Application::InitBitmap(string name, wstring path){
+	ID2D1Bitmap *bitmap;
+	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(APP_PATH + path).c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap);
+	addResource(name, bitmap);
+}
 
 X::Rect schemToLocalZ(X::Rect r, double z, int width, int height);
 X::Rect schemToLocal(X::Rect r);
@@ -121,14 +126,11 @@ vector<ColorRect *> newcolorrect = vector<ColorRect *>();
 
 X::Rect PLAYER_SCREEN_LOC;
 X::Rect SCREEN_BOUNDS;
+X::Rect LEVEL_BOUNDS;
 
 inline bool strcompare(const wchar_t *a, const wchar_t *b)
 {
 	return _wcsnicmp(a, b, max(wcslen(a), wcslen(b))) == 0;
-}
-
-void sortAssets(){
-	
 }
 
 wstring Application::runConsoleCommand(wstring cmd)
@@ -195,18 +197,17 @@ void Application::Paint()
 	
 	for (ColorRect *p : colorrect)
 	{
-		Rect r = p->rect();
-			X::Rect obj = schemToLocal(r);
+			X::Rect obj = schemToLocal(*p);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 		pRT->FillRectangle(obj.expanded(2).toRectF(), getColor(p->getColor()));
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
-
+	const int z = 2;
 	if(DEBUGVIEW){
-	for (int y = 0; y < 100; y++)
+	for (int y = LEVEL_BOUNDS.top()-z; y < LEVEL_BOUNDS.bottom()+z; y++)
 	{
-		for (int x = 0; x < 100; x++)
+		for (int x = LEVEL_BOUNDS.left()-z; x < LEVEL_BOUNDS.right()+z; x++)
 		{
 			X::Point coord(x, y);
 			coord.multiplySelf(GRIDSIZE);
@@ -235,13 +236,13 @@ void Application::Paint()
 			pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
+
 	
 	for (LevelProp *p : props)
 	{
-		Rect r = p->rect();
 		if (getResource(p->res()) != NULL && p->getZ()<=1.000)
 		{
-			X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 			pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
@@ -249,25 +250,26 @@ void Application::Paint()
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 
-	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), getColor("red"));
-
 	for (GameObject *collider : colliders)
 	{
-		Rect r = collider->getRect();
-		X::Rect obj = schemToLocal(collider->getRect());
+		X::Rect obj = schemToLocal(*collider);
 		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 			continue;
 
 		pRT->DrawRectangle(obj.toRectF(), getColor("black"), 4);
 	}
+	
+
+	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), getColor("red"));
+
+	
 
 	if(SHOWPROPS){
 	for (LevelProp *p : props)
 	{
-		Rect r = p->rect();
 		if (getResource(p->res()) != NULL && p->getZ()>1.000)
 		{
-			X::Rect obj = schemToLocalZ(r, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 			pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
@@ -302,9 +304,10 @@ void Application::Paint()
 		pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), getColor("orange"), 2);
 	}
 
+	Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
 	if (firstpoint_b == false)
 	{
-		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+		
 		Point p2 = schemToLocalPoint(p1);
 		if (editmode == 0)
 		{
@@ -321,6 +324,9 @@ void Application::Paint()
 			pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
+
+	wstring str = L"coord=("+to_wstring((int)p1.getX()) + L"," + to_wstring((int)p1.getY()) + L")";
+	pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(SCREEN_BOUNDS.right()-100,20,SCREEN_BOUNDS.right(),50), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	if(DEBUGVIEW){
 	//pRT->DrawRectangle(D2D1::RectF(SCREEN_BOUNDS.right() * 0.2, SCREEN_BOUNDS.bottom() * 0.2, SCREEN_BOUNDS.right() * 0.8, SCREEN_BOUNDS.bottom() * 0.8), getColor("red"), 6);
 	}
@@ -328,7 +334,50 @@ void Application::Paint()
 
 void Application::tick(long tick)
 {
+	
+	LEVEL_BOUNDS = X::Rect(9999,9999,-9999,-9999);
+	for(GameObject* o : colliders){
+		if((*o).left()<LEVEL_BOUNDS.left())
+			LEVEL_BOUNDS.setLeft((*o).left());
+		if((*o).right()>LEVEL_BOUNDS.right())
+			LEVEL_BOUNDS.setRight((*o).right());
+		if((*o).top()<LEVEL_BOUNDS.top())
+			LEVEL_BOUNDS.setTop((*o).top());
+		if((*o).bottom()>LEVEL_BOUNDS.bottom())
+			LEVEL_BOUNDS.setBottom((*o).bottom());
+	}
+	for(LevelProp* o : props){
+		if((*o).left()<LEVEL_BOUNDS.left())
+			LEVEL_BOUNDS.setLeft((*o).left());
+		if((*o).right()>LEVEL_BOUNDS.right())
+			LEVEL_BOUNDS.setRight((*o).right());
+		if((*o).top()<LEVEL_BOUNDS.top())
+			LEVEL_BOUNDS.setTop((*o).top());
+		if((*o).bottom()>LEVEL_BOUNDS.bottom())
+			LEVEL_BOUNDS.setBottom((*o).bottom());
+	}
+	for(ColorRect* o : colorrect){
+		if((*o).left()<LEVEL_BOUNDS.left())
+			LEVEL_BOUNDS.setLeft((*o).left());
+		if((*o).right()>LEVEL_BOUNDS.right())
+			LEVEL_BOUNDS.setRight((*o).right());
+		if((*o).top()<LEVEL_BOUNDS.top())
+			LEVEL_BOUNDS.setTop((*o).top());
+		if((*o).bottom()>LEVEL_BOUNDS.bottom())
+			LEVEL_BOUNDS.setBottom((*o).bottom());
+	}
 
+	if(!firstpoint_b){
+	Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+	if(p1.getX()<LEVEL_BOUNDS.left())
+			LEVEL_BOUNDS.setLeft(p1.getX());
+	if(p1.getX()>LEVEL_BOUNDS.right())
+			LEVEL_BOUNDS.setRight(p1.getX());
+	if(p1.getY()<LEVEL_BOUNDS.top())
+			LEVEL_BOUNDS.setTop(p1.getY());
+	if(p1.getY()>LEVEL_BOUNDS.bottom())
+			LEVEL_BOUNDS.setBottom(p1.getY());
+	}
 	// bool pressed = Peripherals::keyPressed(0x41);
 	// if(pressed)
 	// x1 += 4;
@@ -379,14 +428,14 @@ void Application::tick(long tick)
 
 		for (GameObject *r : colliders)
 		{
-			X::Rect obj = schemToLocal(r->getRect());
+			X::Rect obj = schemToLocal(*r);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 			CollisionReturn ret = CollisionUtil::DynamicCollision(PLAYER_SCREEN_LOC, obj, movex, movey);
 			if (ret.y_collision)
 			{
 				colliding = true;
-				if (ret.disp_y <= 0)
+				if (ret.disp_y <= 0 && ret.intent_y<0)
 				{
 					grounded = true;
 				}
@@ -535,7 +584,7 @@ void Application::InputProcessing()
 	}
 }
 #define BRUSH(y, x) pRT->CreateSolidColorBrush(D2D1::ColorF(x), y);
-void Application::InitResources(IDWriteFactory *pDWriteFactory, IWICImagingFactory *pFactory)
+void Application::InitResources(IDWriteFactory *pDWriteFactory)
 {
 
 	InitColor("black", D2D1::ColorF(D2D1::ColorF::Black));
@@ -568,36 +617,17 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory, IWICImagingFacto
 		L"en-us",
 		&debug_txt);
 
-	ID2D1Bitmap *bitmap;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\image1.PNG").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap);
-	addResource("pat", bitmap);
-	ID2D1Bitmap *bitmap1;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\cave_end1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap1);
-	addResource("caveend1", bitmap1);
-	ID2D1Bitmap *bitmap2;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\fadingcave.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap2);
-	addResource("fadingcave", bitmap2);
-	ID2D1Bitmap *bitmap3;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\cave1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap3);
-	addResource("cave1", bitmap3);
-	ID2D1Bitmap *bitmap4;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap4);
-	addResource("rock1", bitmap4);
-	ID2D1Bitmap *bitmap5;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock2.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap5);
-	addResource("rock2", bitmap5);
-	ID2D1Bitmap *bitmap6;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\rock3.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap6);
-	addResource("rock3", bitmap6);
-	ID2D1Bitmap *bitmap7;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\crate.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap7);
-	addResource("crate", bitmap7);
-	ID2D1Bitmap *bitmap8;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\lamp.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap8);
-	addResource("lamp", bitmap8);
-	ID2D1Bitmap *bitmap9;
-	LoadBitmapFromFile(pRT, pFactory, PCWSTR(wstring(APP_PATH + L"\\res\\pillar1.png").c_str()), RESOURCE_SIZE, RESOURCE_SIZE, &bitmap9);
-	addResource("pillar1", bitmap9);
+	
+	InitBitmap("pat", L"\\res\\image1.png");
+	InitBitmap("caveend1", L"\\res\\cave_end1.png");
+	InitBitmap("fadingcave", L"\\res\\fadingcave.png");
+	InitBitmap("cave1", L"\\res\\cave1.png");
+	InitBitmap("rock1", L"\\res\\rock1.png");
+	InitBitmap("rock2", L"\\res\\rock2.png");
+	InitBitmap("rock3", L"\\res\\rock3.png");
+	InitBitmap("crate", L"\\res\\crate.png");
+	InitBitmap("lamp", L"\\res\\lamp.png");
+	InitBitmap("pillar1", L"\\res\\pillar1.png");
 }
 void Application::DeinitResources()
 {
@@ -606,6 +636,10 @@ void Application::DeinitResources()
 		delete obj;
 	}
 	for (LevelProp *p : props)
+	{
+		delete p;
+	}
+	for (ColorRect *p : colorrect)
 	{
 		delete p;
 	}
@@ -624,10 +658,11 @@ void Application::DeinitResources()
 	SafeRelease(debug_txt);
 }
 
-Application::Application(HWND hWnd, ID2D1HwndRenderTarget *pRT)
+Application::Application(HWND hWnd, ID2D1HwndRenderTarget *pRT, IWICImagingFactory *pWICFactory)
 {
 	this->hWnd = hWnd;
 	this->pRT = pRT;
+	this->pWICFactory = pWICFactory;
 
 	readconfig(APP_PATH + L"\\level.txt", colliders, props, colorrect);
 }

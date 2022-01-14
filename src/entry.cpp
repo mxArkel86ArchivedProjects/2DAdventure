@@ -16,7 +16,7 @@ static Application app;
 static ID2D1HwndRenderTarget* pRT = NULL;
 static ID2D1Factory* pD2DFactory = NULL;
 static IDWriteFactory* pDWriteFactory;
-IWICImagingFactory *pFactory = NULL;
+IWICImagingFactory *pWICFactory = NULL;
 
 long tick = 0;
 
@@ -74,7 +74,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
     CLSID_WICImagingFactory,
     NULL,
     CLSCTX_INPROC_SERVER,
-    IID_PPV_ARGS(&pFactory)
+    IID_PPV_ARGS(&pWICFactory)
 );
 
     // Obtain the size of the drawing area.
@@ -94,8 +94,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         &pRT
     );
 
-    app = Application(hWnd, pRT);
-    app.InitResources(pDWriteFactory, pFactory);
+    app = Application(hWnd, pRT, pWICFactory);
+    app.InitResources(pDWriteFactory);
     
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);

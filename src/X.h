@@ -14,6 +14,8 @@ namespace X {
 		Point();
 		double getX();
 		double getY();
+		void setX(double);
+		void setY(double);
 		int getIX();
 		int getIY();
 		void addDotSelf(Point p);
@@ -35,6 +37,10 @@ namespace X {
 		double top();
 		double left();
 		double right();
+		void setLeft(double);
+		void setRight(double);
+		void setTop(double);
+		void setBottom(double);
 		Point topLeft();
 		Point bottomRight();
 		Rect expanded(double);
