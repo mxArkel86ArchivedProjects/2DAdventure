@@ -1,4 +1,4 @@
 --Collisions--
+78,35,78,39,T
 --assets--
 --colorrect--
-cavegray,36,14,75,17

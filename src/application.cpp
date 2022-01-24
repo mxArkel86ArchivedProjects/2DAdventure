@@ -35,6 +35,7 @@ std::wstring_convert<convert_type, wchar_t> converter;
 #define GRIDSIZE_ 40
 #define GRIDSIZE_DEBUG 30
 #define PLAYER_SPEED 2.2
+#define PLAYER_SPEED_DEBUG 4
 #define GRAV_CONST 0.12
 #define JUMP_INTENSITY 5
 #define CONSOLE_TEXT_SIZE 16
@@ -246,17 +247,7 @@ void Application::Paint()
 	}
 
 	
-	for (LevelProp *p : props)
-	{
-		if (getResource(p->res()) != NULL && p->getZ()<=1.000)
-		{
-			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
-			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
-				continue;
-			pRT->DrawBitmap(getResource(p->res()), obj.expanded(1).toRectF(), FLOAT(1.0f));
-		}
-		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
-	}
+	
 
 	for (GameObject *collider : colliders)
 	{
@@ -269,6 +260,17 @@ void Application::Paint()
 		pRT->DrawRectangle(obj.toRectF(), getColor("black"), 4);
 	}
 	
+	for (LevelProp *p : props)
+	{
+		if (getResource(p->res()) != NULL && p->getZ()<=1.000)
+		{
+			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+				continue;
+			pRT->DrawBitmap(getResource(p->res()), obj.expanded(1).toRectF(), FLOAT(1.0f));
+		}
+		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
 
 	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), getColor("red"));
 
@@ -416,15 +418,16 @@ void Application::tick(long tick)
 			intent_y--;
 	}
 
+	const double speed = DEBUGVIEW?PLAYER_SPEED_DEBUG:PLAYER_SPEED;
 	if (intent_x != 0 || intent_y != 0)
 	{
 		double angle = atan2(intent_y, intent_x);
-		double x_ = cos(angle) * PLAYER_SPEED;
+		double x_ = cos(angle) * speed;
 		movex += x_;
 
 		if (noclip)
 		{
-			double y_ = sin(angle) * PLAYER_SPEED;
+			double y_ = sin(angle) * speed;
 			movey += y_;
 		}
 	}
@@ -525,6 +528,7 @@ void Application::InputProcessing()
 	}
 
 	//CLICK PROCESSING
+	if(DEBUGVIEW){
 	if (Peripherals::mouseClickedLeft())
 	{
 		X::Point m = Peripherals::mouseClickLeftPos();
@@ -594,6 +598,7 @@ void Application::InputProcessing()
 	if (Peripherals::keyPressed(0x58))
 	{ //X
 		firstpoint_b = true;
+	}
 	}
 }
 
@@ -694,7 +699,7 @@ void Application::init(){
 
 void Application::onResize(int width, int height)
 {
-	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - PLAYER_SIZE) / 2, height * 0.750 - PLAYER_SIZE / 2), X::Point((width + PLAYER_SIZE) / 2, height * 0.750 + PLAYER_SIZE / 2));
+	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - PLAYER_SIZE) / 2, height * 0.60 - PLAYER_SIZE / 2), X::Point((width + PLAYER_SIZE) / 2, height * 0.60 + PLAYER_SIZE / 2));
 	SCREEN_BOUNDS = X::Rect(X::Point(0, 0), X::Point(width, height));
 }
 
