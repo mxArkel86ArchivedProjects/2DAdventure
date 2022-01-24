@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <string>
+#include <Xinput.h>
 
 class Peripherals
 {
@@ -18,20 +19,21 @@ class Peripherals
 	static int mouseclick_yr;
 	static int mouseclick_xl;
 	static int mouseclick_yl;
+	static bool Peripherals::controllerConnected(int i, XINPUT_STATE& state);
 public:
-	
-	static bool keyPressed(WPARAM);
 	static void KeyPressIn(WPARAM p, bool type);
 	static void MouseMoveIn(int, int);
-
-	static std::wstring unloadQueue();
+	static void mouseClickLeftIn(int x, int y);
+	static void mouseClickRightIn(int x, int y);
 	static void queueState(bool);
+
+	static bool keyPressed(WPARAM);
+	static std::wstring unloadQueue();
 	static bool queueUpdate();
 	static X::Point mousePos();
-	static void mouseClickLeftIn(int x, int y);
 	static bool mouseClickedLeft();
 	static X::Point mouseClickLeftPos();
-	static void mouseClickRightIn(int x, int y);
 	static bool mouseClickedRight();
 	static X::Point mouseClickRightPos();
+	static X::PolarPoint controllerOutput(int i);
 };

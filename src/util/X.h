@@ -7,11 +7,14 @@ using std::string;
 namespace X {
 	class Point
 	{
+		bool null_ = false;
 		double x;
 		double y;
 	public:
 		Point(double x, double y);
 		Point();
+		Point(int);
+		operator int();
 		double getX();
 		double getY();
 		void setX(double);
@@ -24,6 +27,22 @@ namespace X {
 		Point add(Point p);
 		D2D1_POINT_2F P2F();
 		static Point Empty();
+	};
+	class PolarPoint
+	{
+		bool null_ = false;
+		double angle;
+		double magnitude;
+	public:
+		PolarPoint(double angle, double magnitude);
+		PolarPoint();
+		operator int();
+		PolarPoint(int);
+		double getAngle();
+		double getMagnitude();
+		void setAngle(double);
+		void setMagnitude(double);
+		
 	};
 	class Rect {
 	protected:

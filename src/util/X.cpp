@@ -7,19 +7,28 @@ X::Point::Point() {
 	Point(0, 0);
 }
 double X::Point::getX() {
+	if(null_)
+	throw "POINT IS NULL";
 	return x;
 }
 double X::Point::getY() {
+	if(null_)
+	throw "POINT IS NULL";
 	return y;
 }
 int X::Point::getIX() {
+	if(null_)
+	throw "POINT IS NULL";
 	return (int)x;
 }
 int X::Point::getIY() {
+	if(null_)
+	throw "POINT IS NULL";
 	return (int)y;
 }
 
 void X::Point::addDotSelf(Point p) {
+	null_ = false;
 	this->x += p.x;
 	this->y += p.y;
 }
@@ -27,12 +36,56 @@ void X::Point::multiplySelf(double d) {
 	this->x *= d;
 	this->y *= d;
 }
+X::Point::operator int(){
+	return !null_;
+}
 
 X::Point X::Point::multiply(double d) {
+	null_ = false;
 	return X::Point(this->x * d, this->y * d);
 }
 X::Point X::Point::add(Point p) {
+	null_ = false;
 	return X::Point(this->x + p.x, this->y * p.y);
+}
+X::Point::Point(int i){
+	if(i==0)
+		null_ = true;
+}
+
+X::PolarPoint::PolarPoint(){
+
+}
+X::PolarPoint::operator int(){
+	return !null_;
+}
+
+X::PolarPoint::PolarPoint(double angle, double mag){
+	this->angle = angle;
+	this->magnitude = mag;
+}
+void X::PolarPoint::setAngle(double a){
+	null_ = false;
+	this->angle = a;
+}
+
+void X::PolarPoint::setMagnitude(double b){
+	null_ = false;
+	this->magnitude = b;
+}
+double X::PolarPoint::getAngle(){
+	if(null_)
+		throw "POINT IS NULL";
+	return angle;
+}
+double X::PolarPoint::getMagnitude(){
+	if(null_)
+		throw "POINT IS NULL";
+	return magnitude;
+}
+X::PolarPoint::PolarPoint(int i){
+	if(i==0)
+		null_ = true;
 }
 
 double X::Rect::bottom() {

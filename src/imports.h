@@ -13,3 +13,5 @@
 
 #pragma comment(lib, "Dwrite")
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Xinput.lib")
+#pragma comment(lib, "Xinput9_1_0.lib")
