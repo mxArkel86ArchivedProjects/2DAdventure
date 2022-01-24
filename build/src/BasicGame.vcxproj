@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9BDDBDFB-4652-3D7A-AF99-5E1161AAC811}</ProjectGuid>
+    <ProjectGuid>{B93617F7-3E9C-3ADD-8153-0FADEBED2A42}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
     <Platform>win32</Platform>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">BasicGame.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">BasicGame</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">BasicGame.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|win32'">BasicGame</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">BasicGame.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">BasicGame</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">BasicGame.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">BasicGame</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">.exe</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -103,10 +103,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -115,12 +115,12 @@
     </Midl>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:/Users/nicho/source/repos/2DAdventure/build/src/debug;C:/Users/nicho/source/repos/2DAdventure/build/src/debug/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/nicho/source/repos/BasicGame/build/src/Debug/BasicGame.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/nicho/source/repos/BasicGame/build/src/Debug/BasicGame.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/nicho/source/repos/2DAdventure/build/src/Debug/BasicGame.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/nicho/source/repos/2DAdventure/build/src/Debug/BasicGame.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -146,10 +146,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -158,12 +158,12 @@
     </Midl>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:/Users/nicho/source/repos/2DAdventure/build/src/debug;C:/Users/nicho/source/repos/2DAdventure/build/src/debug/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/nicho/source/repos/BasicGame/build/src/Release/BasicGame.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/nicho/source/repos/BasicGame/build/src/Release/BasicGame.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/nicho/source/repos/2DAdventure/build/src/Release/BasicGame.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/nicho/source/repos/2DAdventure/build/src/Release/BasicGame.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -172,7 +172,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
@@ -189,10 +189,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -201,12 +201,12 @@
     </Midl>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:/Users/nicho/source/repos/2DAdventure/build/src/debug;C:/Users/nicho/source/repos/2DAdventure/build/src/debug/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/nicho/source/repos/BasicGame/build/src/MinSizeRel/BasicGame.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/nicho/source/repos/BasicGame/build/src/MinSizeRel/BasicGame.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/nicho/source/repos/2DAdventure/build/src/MinSizeRel/BasicGame.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/nicho/source/repos/2DAdventure/build/src/MinSizeRel/BasicGame.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -215,7 +215,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -231,10 +231,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\BasicGame\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nicho\source\repos\2DAdventure\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -243,12 +243,12 @@
     </Midl>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:/Users/nicho/source/repos/2DAdventure/build/src/debug;C:/Users/nicho/source/repos/2DAdventure/build/src/debug/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/nicho/source/repos/BasicGame/build/src/RelWithDebInfo/BasicGame.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/nicho/source/repos/BasicGame/build/src/RelWithDebInfo/BasicGame.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/nicho/source/repos/2DAdventure/build/src/RelWithDebInfo/BasicGame.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/nicho/source/repos/2DAdventure/build/src/RelWithDebInfo/BasicGame.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
@@ -256,11 +256,11 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\nicho\source\repos\BasicGame\src\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\nicho\source\repos\2DAdventure\src\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Building Custom Rule C:/Users/nicho/source/repos/BasicGame/src/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Building Custom Rule C:/Users/nicho/source/repos/2DAdventure/src/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/BasicGame -BC:/Users/nicho/source/repos/BasicGame/build --check-stamp-file C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/2DAdventure -BC:/Users/nicho/source/repos/2DAdventure/build --check-stamp-file C:/Users/nicho/source/repos/2DAdventure/build/src/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -269,11 +269,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|win32'">Building Custom Rule C:/Users/nicho/source/repos/BasicGame/src/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|win32'">Building Custom Rule C:/Users/nicho/source/repos/2DAdventure/src/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/BasicGame -BC:/Users/nicho/source/repos/BasicGame/build --check-stamp-file C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/2DAdventure -BC:/Users/nicho/source/repos/2DAdventure/build --check-stamp-file C:/Users/nicho/source/repos/2DAdventure/build/src/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -282,11 +282,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">Building Custom Rule C:/Users/nicho/source/repos/BasicGame/src/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">Building Custom Rule C:/Users/nicho/source/repos/2DAdventure/src/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/BasicGame -BC:/Users/nicho/source/repos/BasicGame/build --check-stamp-file C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/2DAdventure -BC:/Users/nicho/source/repos/2DAdventure/build --check-stamp-file C:/Users/nicho/source/repos/2DAdventure/build/src/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -295,11 +295,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">Building Custom Rule C:/Users/nicho/source/repos/BasicGame/src/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">Building Custom Rule C:/Users/nicho/source/repos/2DAdventure/src/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/BasicGame -BC:/Users/nicho/source/repos/BasicGame/build --check-stamp-file C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/nicho/source/repos/2DAdventure -BC:/Users/nicho/source/repos/2DAdventure/build --check-stamp-file C:/Users/nicho/source/repos/2DAdventure/build/src/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -308,36 +308,36 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\nicho\source\repos\BasicGame\build\src\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\nicho\source\repos\2DAdventure\build\src\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\entry.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.cpp" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.h" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.cpp" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\application.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\application.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\Peripherals.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\Peripherals.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\CollisionUtil.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\CollisionUtil.h" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\util.h" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\X.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\X.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\imports.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\GameObject.cpp" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\GameObject.h" />
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\LevelProp.h" />
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\LevelProp.cpp" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\entry.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\ColorRect.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\ColorRect.cpp" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ConfigMgr.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ConfigMgr.h" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ImageUtil.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ImageUtil.cpp" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\application.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\application.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\Peripherals.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\Peripherals.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\CollisionUtil.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\CollisionUtil.h" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\util.h" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\X.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\X.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\imports.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\GameObject.cpp" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\GameObject.h" />
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\LevelProp.h" />
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\LevelProp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\nicho\source\repos\BasicGame\build\ZERO_CHECK.vcxproj">
-      <Project>{05A04EDA-B2DC-37FC-88EC-A272DF751F98}</Project>
+    <ProjectReference Include="C:\Users\nicho\source\repos\2DAdventure\build\ZERO_CHECK.vcxproj">
+      <Project>{A365B0B4-4FDC-39DF-8A45-C246C564C974}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

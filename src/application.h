@@ -18,9 +18,10 @@ public:
 	void DeinitResources();
 	void tick(long tick);
 	void onResize(int width, int height);
-	void InitColor(string name, D2D1_COLOR_F color);
 	void InitBitmap(string name, wstring path, int size);
+	void InitColor(string name, D2D1_COLOR_F color);
 	wstring runConsoleCommand(wstring cmd);
 	void InputProcessing();
+	void init();
 };
 

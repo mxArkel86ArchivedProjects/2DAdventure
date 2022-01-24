@@ -4,8 +4,11 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("BasicGame")
+set(WIN32 True)
 
 # Include sub-projects.
+link_directories("build/src/debug")
 include_directories("deps")
+
 
 add_subdirectory ("src")

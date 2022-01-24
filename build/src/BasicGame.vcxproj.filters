@@ -1,81 +1,81 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\entry.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\ColorRect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ConfigMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ImageUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\application.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\Peripherals.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\Peripherals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\CollisionUtil.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\CollisionUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\X.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\util\X.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\GameObject.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\nicho\source\repos\BasicGame\src\LevelProp.cpp">
+    <ClCompile Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\LevelProp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ColorRect.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\ColorRect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ConfigMgr.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ConfigMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\ImageUtil.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\ImageUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\application.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\Peripherals.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\Peripherals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\CollisionUtil.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\CollisionUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\util.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\X.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\util\X.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\imports.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\imports.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\GameObject.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\nicho\source\repos\BasicGame\src\LevelProp.h">
+    <ClInclude Include="C:\Users\nicho\source\repos\2DAdventure\src\gameobject\LevelProp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\nicho\source\repos\BasicGame\src\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\nicho\source\repos\2DAdventure\src\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{36E2B479-B8D2-38C8-9922-D873F8E8449B}</UniqueIdentifier>
+      <UniqueIdentifier>{3D878D50-4A94-3493-9F78-A18543F67ED1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{CA76C264-ECEA-39EC-9556-65562FF2745C}</UniqueIdentifier>
+      <UniqueIdentifier>{3604B685-F4CE-3088-924B-5E058BD39E45}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

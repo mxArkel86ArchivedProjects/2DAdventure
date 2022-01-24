@@ -1,24 +1,27 @@
 #include "application.h"
-#include "X.h"
-#include "util.h"
+#include "util/X.h"
+#include "util/util.h"
 #include "Peripherals.h"
 #include <vector>
-#include "GameObject.h"
-#include "CollisionUtil.h"
+#include "gameobject/GameObject.h"
+#include "util/CollisionUtil.h"
 #include <string>
-#include "LevelProp.h"
-#include "ImageUtil.h"
-#include "ConfigMgr.h"
-#include "ColorRect.h"
+#include "gameobject/LevelProp.h"
+#include "util/ImageUtil.h"
+#include "util/ConfigMgr.h"
+#include "gameobject/ColorRect.h"
+#include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <iostream>
+#include <codecvt>
+#include <locale>
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 using namespace boost;
 using namespace std;
+namespace fs = boost::filesystem;
 
-#include <codecvt>
-#include <locale>
 
 IDWriteTextFormat *console_txt;
 IDWriteTextFormat *debug_txt;
@@ -26,16 +29,17 @@ IDWriteTextFormat *debug_txt;
 using convert_type = std::codecvt_utf8<wchar_t>;
 std::wstring_convert<convert_type, wchar_t> converter;
 
+
 #define PLAYER_SIZE_ 100
 #define PLAYER_SIZE_DEBUG 60
 #define GRIDSIZE_ 40
 #define GRIDSIZE_DEBUG 30
 #define PLAYER_SPEED 2.2
-#define GRAV_CONST 0.13
-#define JUMP_INTENSITY 4.7
+#define GRAV_CONST 0.12
+#define JUMP_INTENSITY 5
 #define CONSOLE_TEXT_SIZE 16
 #define CONSOLE_TEXT_SPACING 4
-#define RESOURCE_SIZE 9999
+#define RESOURCE_SIZE 1000
 
 X::Point location;
 double x1 = 0;
@@ -51,8 +55,8 @@ bool firstpoint_b = true;
 int editmode = 0;
 double select_z = 1;
 bool select_z_toggle = true;
-wstring APP_PATH = L"C:\\Users\\nicho\\source\\repos\\BasicGame\\build\\BasicGame\\Debug";
-string currentasset = "pat";
+wstring APP_PATH = L"C:\\Users\\nicho\\source\\repos\\2DAdventure\\build\\src\\Debug";
+string currentasset = "void";
 string currentcolor = "black";
 bool DEBUGVIEW = true;
 double GRIDSIZE = GRIDSIZE_DEBUG;
@@ -61,6 +65,9 @@ bool SHOWPROPS = true;
 
 std::unordered_map<string, ID2D1Bitmap *> resources = std::unordered_map<string, ID2D1Bitmap *>();
 std::unordered_map<string, ID2D1SolidColorBrush *> colors = std::unordered_map<string, ID2D1SolidColorBrush *>();
+
+
+std::string get_stem(const fs::path &p) { return (p.stem().string()); }
 
 void addResource(string name, ID2D1Bitmap *&ptr)
 {
@@ -75,26 +82,18 @@ ID2D1Bitmap *getResource(string name)
 	return resources[name];
 }
 
-void addColor(string name, ID2D1SolidColorBrush *&ptr)
-{
-	colors.insert_or_assign(name, ptr);
-}
-void removeColor(string name)
-{
-	colors.erase(name);
-}
 ID2D1SolidColorBrush *getColor(string name)
 {
 	return colors[name];
 }
-
 void Application::InitColor(string name, D2D1_COLOR_F color)
 {
 	ID2D1SolidColorBrush *br = NULL;
 	const D2D1_COLOR_F c(color);
 	pRT->CreateSolidColorBrush(c, &br);
-	addColor(name, br);
+	colors.insert_or_assign(name, br);
 }
+
 void Application::InitBitmap(string name, wstring path, int size){
 	ID2D1Bitmap *bitmap;
 	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(APP_PATH + path).c_str()), size, size, &bitmap);
@@ -147,6 +146,10 @@ wstring Application::runConsoleCommand(wstring cmd)
 		SHOWPROPS = !SHOWPROPS;
 		wstring resp = SHOWPROPS ? L"Successfully enabled props" : L"Successfully disabled props";
 		return resp;
+	}if (strcompare(cmd.c_str(), L"init"))
+	{
+		init();
+		return L"Successfully reinitialized app";
 	}else if (strcompare(cmd.c_str(), L"debug"))
 	{
 		DEBUGVIEW = !DEBUGVIEW;
@@ -197,10 +200,15 @@ void Application::Paint()
 	
 	for (ColorRect *p : colorrect)
 	{
+		ID2D1SolidColorBrush* br2= getColor(p->getColor());
+		if(br2==nullptr)
+				continue;
 			X::Rect obj = schemToLocal(*p);
+			
+			
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
-		pRT->FillRectangle(obj.expanded(2).toRectF(), getColor(p->getColor()));
+		pRT->FillRectangle(obj.expanded(1).toRectF(), br2);
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 	const int z = 2;
@@ -233,7 +241,7 @@ void Application::Paint()
 			pRT->FillRectangle(loc.toRectF(), getColor(currentcolor));
 
 			wstring str = L"color=" + converter.from_bytes(currentcolor);
-			pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
 
@@ -245,13 +253,15 @@ void Application::Paint()
 			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
-			pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
+			pRT->DrawBitmap(getResource(p->res()), obj.expanded(1).toRectF(), FLOAT(1.0f));
 		}
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 
 	for (GameObject *collider : colliders)
 	{
+		if(!collider->visible()&&!DEBUGVIEW)
+			continue;
 		X::Rect obj = schemToLocal(*collider);
 		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 			continue;
@@ -288,10 +298,10 @@ void Application::Paint()
 			ConsoleLine line = console_history[i];
 			ID2D1SolidColorBrush *color = line.getOwner() == 0 ? getColor("orange") : getColor("white");
 
-			pRT->DrawTextA(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + 20, SCREEN_BOUNDS.right() - 40, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + CONSOLE_TEXT_SIZE + 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + 20, SCREEN_BOUNDS.right() - 40, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + CONSOLE_TEXT_SIZE + 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 
-		pRT->DrawTextA(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, SCREEN_BOUNDS.bottom() - 20 - CONSOLE_TEXT_SIZE, SCREEN_BOUNDS.right() - 40, SCREEN_BOUNDS.bottom() - 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+		pRT->DrawText(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, SCREEN_BOUNDS.bottom() - 20 - CONSOLE_TEXT_SIZE, SCREEN_BOUNDS.right() - 40, SCREEN_BOUNDS.bottom() - 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
 
 	//draw pointer and level designer stuff
@@ -316,17 +326,20 @@ void Application::Paint()
 		else if (editmode == 1)
 		{
 			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint), p2);
-			pRT->DrawBitmap(getResource(currentasset), loc.toRectF(), FLOAT(0.6f));
+			ID2D1Bitmap* asset = getResource(currentasset);
+			if(asset!=nullptr){
+			pRT->DrawBitmap(asset, loc.toRectF(), FLOAT(0.6f));
+			}
 			pRT->DrawRectangle(loc.toRectF(), getColor("red"), 4);
 
 			X::Rect r1 = X::Rect(firstpoint, p1);
 			wstring str = L"z=" + std::to_wstring(select_z) + L"  size=(" + to_wstring((int)(r1.right() - r1.left())) + L"," + to_wstring((int)(r1.bottom() - r1.top())) + L")";
-			pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
 
 	wstring str = L"coord=("+to_wstring((int)p1.getX()) + L"," + to_wstring((int)p1.getY()) + L")";
-	pRT->DrawTextA(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(SCREEN_BOUNDS.right()-100,20,SCREEN_BOUNDS.right(),50), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+	pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(SCREEN_BOUNDS.right()-100,20,SCREEN_BOUNDS.right(),50), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	if(DEBUGVIEW){
 	//pRT->DrawRectangle(D2D1::RectF(SCREEN_BOUNDS.right() * 0.2, SCREEN_BOUNDS.bottom() * 0.2, SCREEN_BOUNDS.right() * 0.8, SCREEN_BOUNDS.bottom() * 0.8), getColor("red"), 6);
 	}
@@ -583,20 +596,10 @@ void Application::InputProcessing()
 		firstpoint_b = true;
 	}
 }
+
 #define BRUSH(y, x) pRT->CreateSolidColorBrush(D2D1::ColorF(x), y);
 void Application::InitResources(IDWriteFactory *pDWriteFactory)
 {
-
-	InitColor("black", D2D1::ColorF(D2D1::ColorF::Black));
-	InitColor("white", D2D1::ColorF(D2D1::ColorF::White));
-	InitColor("red", D2D1::ColorF(D2D1::ColorF::Red));
-	InitColor("green", D2D1::ColorF(D2D1::ColorF::Green));
-	InitColor("orange", D2D1::ColorF(D2D1::ColorF::Orange));
-	InitColor("debug_background", D2D1::ColorF(90, 90, 90, 0.6));
-	InitColor("cavegray", D2D1::ColorF(0x80807f));
-	InitColor("cavegraydark", D2D1::ColorF(0x2f302f));
-	
-
 
 	pDWriteFactory->CreateTextFormat(
 		L"Arial", // Font family name.
@@ -617,17 +620,27 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory)
 		L"en-us",
 		&debug_txt);
 
-	
-	InitBitmap("pat", L"\\res\\image1.png", min(RESOURCE_SIZE,1000));
-	InitBitmap("caveend1", L"\\res\\cave_end1.png", min(RESOURCE_SIZE,2000));
-	InitBitmap("fadingcave", L"\\res\\fadingcave.png", min(RESOURCE_SIZE,2000));
-	InitBitmap("cave1", L"\\res\\cave1.png", min(RESOURCE_SIZE,2000));
-	InitBitmap("rock1", L"\\res\\rock1.png", min(RESOURCE_SIZE,512));
-	InitBitmap("rock2", L"\\res\\rock2.png", min(RESOURCE_SIZE,512));
-	InitBitmap("rock3", L"\\res\\rock3.png", min(RESOURCE_SIZE,512));
-	InitBitmap("crate", L"\\res\\crate.png", min(RESOURCE_SIZE,512));
-	InitBitmap("lamp", L"\\res\\lamp.png", min(RESOURCE_SIZE,512));
-	InitBitmap("pillar1", L"\\res\\pillar1.png", min(RESOURCE_SIZE,2000));
+	wstring p = APP_PATH+wstring(L"\\res\\");
+	if(fs::is_directory(p)) {
+
+        for(auto& entry : boost::make_iterator_range(fs::directory_iterator(p), {})){
+			string fpath1 = get_stem(entry.path());
+            
+			wstring s;
+			s+=L"\\res\\";
+			s+=converter.from_bytes(fpath1);
+			s+=L".png";
+			InitBitmap(fpath1, s, RESOURCE_SIZE);
+			std::cout<<fpath1<<std::endl;
+		}
+    }
+
+	InitColor("black", D2D1::ColorF(D2D1::ColorF::Black));
+	InitColor("white", D2D1::ColorF(D2D1::ColorF::White));
+	InitColor("red", D2D1::ColorF(D2D1::ColorF::Red));
+	InitColor("green", D2D1::ColorF(D2D1::ColorF::Green));
+	InitColor("orange", D2D1::ColorF(D2D1::ColorF::Orange));
+	InitColor("debug_background", D2D1::ColorF(90, 90, 90, 0.6));
 }
 void Application::DeinitResources()
 {
@@ -664,7 +677,19 @@ Application::Application(HWND hWnd, ID2D1HwndRenderTarget *pRT, IWICImagingFacto
 	this->pRT = pRT;
 	this->pWICFactory = pWICFactory;
 
-	readconfig(APP_PATH + L"\\level.txt", colliders, props, colorrect);
+	init();
+	
+}
+
+void Application::init(){
+	colliders.clear();
+	props.clear();
+	colorrect.clear();
+	newcolliders.clear();
+	newprops.clear();
+	newcolorrect.clear();
+	readconfig(APP_PATH + L"\\level.txt", pRT, colliders, props, colorrect, colors);
+	
 }
 
 void Application::onResize(int width, int height)

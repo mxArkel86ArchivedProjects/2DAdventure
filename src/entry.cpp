@@ -1,8 +1,9 @@
 //#include <stdafx.h>
 #include "imports.h"
 #include "application.h"
-#include "util.h"
+#include "util/util.h"
 #include "Peripherals.h"
+#include <iostream>
 
 #pragma comment(lib, "d2d1")
 
@@ -56,6 +57,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         hInstance,                // program instance handle
         NULL);                    // creation parameters
 
+    AllocConsole();
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+    
     CoInitialize(NULL);
 
     
@@ -96,7 +102,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 
     app = Application(hWnd, pRT, pWICFactory);
     app.InitResources(pDWriteFactory);
-    
+
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
 
@@ -117,8 +123,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
     WPARAM wParam, LPARAM lParam)
 {
-    HDC          hdc;
-    PAINTSTRUCT  ps;
 
     switch (message)
     {
@@ -195,6 +199,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
         SafeRelease(pDWriteFactory);
         app.DeinitResources();
         SafeRelease(pD2DFactory);
+        FreeConsole();
 
         PostQuitMessage(0);
         break;

@@ -1,3 +1,3 @@
-C:/Users/nicho/source/repos/BasicGame/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/nicho/source/repos/BasicGame/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/nicho/source/repos/BasicGame/build/src/CMakeFiles/BasicGame.dir
+C:/Users/nicho/source/repos/2DAdventure/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/nicho/source/repos/2DAdventure/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/nicho/source/repos/2DAdventure/build/src/CMakeFiles/BasicGame.dir

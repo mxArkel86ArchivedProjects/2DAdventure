@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\nicho\source\repos\BasicGame\build\Debug\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\nicho\source\repos\2DAdventure\build\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\nicho\source\repos\BasicGame\build\src\Debug\BasicGame.exe</FullPath>
+      <FullPath>C:\Users\nicho\source\repos\2DAdventure\build\src\Debug\BasicGame.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

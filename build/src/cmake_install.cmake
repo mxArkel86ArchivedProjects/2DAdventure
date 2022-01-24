@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/nicho/source/repos/BasicGame/src
+# Install script for directory: C:/Users/nicho/source/repos/2DAdventure/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
