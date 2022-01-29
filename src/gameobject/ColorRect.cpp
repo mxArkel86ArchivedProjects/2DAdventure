@@ -1,4 +1,4 @@
-#include "ColorRect.h"
+#include "../headers/ColorRect.h"
 
 ColorRect::ColorRect(string color, X::Point topleft, X::Point bottomright):X::Rect(topleft, bottomright){
     this->colorname = color;

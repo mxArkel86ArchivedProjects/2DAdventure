@@ -1,4 +1,4 @@
-#include "ImageUtil.h"
+#include "../headers/ImageUtil.h"
 
 HRESULT LoadBitmapFromFile(
     ID2D1RenderTarget *pRenderTarget,

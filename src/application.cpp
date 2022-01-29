@@ -1,48 +1,24 @@
-#include "application.h"
-#include "util/X.h"
-#include "util/util.h"
-#include "Peripherals.h"
-#include <vector>
-#include "gameobject/GameObject.h"
-#include "util/CollisionUtil.h"
-#include <string>
-#include "gameobject/LevelProp.h"
-#include "util/ImageUtil.h"
-#include "util/ConfigMgr.h"
-#include "gameobject/ColorRect.h"
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <iostream>
-#include <codecvt>
-#include <locale>
+#include "../headers/application.h"
+#include "../headers/imports.h"
+#include "../headers/Peripherals.h"
 
-#include "boost/algorithm/string.hpp"
-#include "boost/algorithm/string/predicate.hpp"
-using namespace boost;
-using namespace std;
-namespace fs = boost::filesystem;
+#include "../headers/Collider.h"
+#include "../headers/CollisionUtil.h"
 
-IDWriteTextFormat *console_txt;
-IDWriteTextFormat *debug_txt;
+#include "../headers/LevelProp.h"
+#include "../headers/ImageUtil.h"
+#include "../headers/ColorRect.h"
+#include "../headers/util.h"
 
 using convert_type = std::codecvt_utf8<wchar_t>;
 std::wstring_convert<convert_type, wchar_t> converter;
 
-#define PLAYER_SIZE_ 100
-#define PLAYER_SIZE_DEBUG 60
-#define GRIDSIZE_ 40
-#define GRIDSIZE_DEBUG 30
-#define PLAYER_SPEED 2.2
-#define PLAYER_SPEED_DEBUG 4
-#define GRAV_CONST 0.12
-#define JUMP_INTENSITY 5
-#define CONSOLE_TEXT_SIZE 16
-#define CONSOLE_TEXT_SPACING 4
-#define RESOURCE_SIZE 1000
+IDWriteTextFormat *console_txt;
+IDWriteTextFormat *debug_txt;
+
 
 X::Point location;
 double x1 = 0;
-bool noclip = true;
 double vertical_velocity = 0;
 bool console_up = false;
 bool console_toggle = true;
@@ -54,36 +30,16 @@ bool firstpoint_b = true;
 int editmode = 0;
 double select_z = 1;
 bool select_z_toggle = true;
-wstring APP_PATH = L"C:\\Users\\nicho\\source\\repos\\2DAdventure\\build\\src\\Debug";
-string currentasset = "void";
-string currentcolor = "black";
-bool DEBUGVIEW = true;
-double GRIDSIZE = GRIDSIZE_DEBUG;
-double PLAYER_SIZE = PLAYER_SIZE_DEBUG;
-bool SHOWPROPS = true;
+bool showprops = true;
 
-std::unordered_map<string, ID2D1Bitmap *> resources = std::unordered_map<string, ID2D1Bitmap *>();
-std::unordered_map<string, ID2D1SolidColorBrush *> colors = std::unordered_map<string, ID2D1SolidColorBrush *>();
 
-std::string get_stem(const fs::path &p) { return (p.stem().string()); }
+std::string get_stem(const fs::path& p) { return (p.stem().string()); }
 
-void addResource(string name, ID2D1Bitmap *&ptr)
+inline bool strcompare(const wchar_t* a, const wchar_t* b)
 {
-	resources.insert_or_assign(name, ptr);
-}
-void removeResource(string name)
-{
-	resources.erase(name);
-}
-ID2D1Bitmap *getResource(string name)
-{
-	return resources[name];
+	return _wcsnicmp(a, b, max(wcslen(a), wcslen(b))) == 0;
 }
 
-ID2D1SolidColorBrush *getColor(string name)
-{
-	return colors[name];
-}
 void Application::InitColor(string name, D2D1_COLOR_F color)
 {
 	ID2D1SolidColorBrush *br = NULL;
@@ -95,108 +51,14 @@ void Application::InitColor(string name, D2D1_COLOR_F color)
 void Application::InitBitmap(string name, wstring path, int size)
 {
 	ID2D1Bitmap *bitmap;
-	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(APP_PATH + path).c_str()), size, size, &bitmap);
-	addResource(name, bitmap);
+	LoadBitmapFromFile(pRT, pWICFactory, PCWSTR(wstring(INFO::APP_PATH + path).c_str()), size, size, &bitmap);
+	resources.insert_or_assign(name, bitmap);
 }
 
-X::Rect schemToLocalZ(X::Rect r, double z, int width, int height);
-X::Rect schemToLocal(X::Rect r);
-X::Point schemToLocalPoint(X::Point r);
-class ConsoleLine
-{
-	wstring text;
-	int owner;
 
-public:
-	ConsoleLine(int owner, wstring text);
-	wstring getText();
-	int getOwner();
-};
 void InputProcessing();
 
-vector<ConsoleLine> console_history = vector<ConsoleLine>();
-vector<GameObject *> colliders = vector<GameObject *>();
-vector<GameObject *> newcolliders = vector<GameObject *>();
-vector<LevelProp *> props = vector<LevelProp *>();
-vector<LevelProp *> newprops = vector<LevelProp *>();
-vector<ColorRect *> colorrect = vector<ColorRect *>();
-vector<ColorRect *> newcolorrect = vector<ColorRect *>();
 
-X::Rect PLAYER_SCREEN_LOC;
-X::Rect SCREEN_BOUNDS;
-X::Rect LEVEL_BOUNDS;
-
-inline bool strcompare(const wchar_t *a, const wchar_t *b)
-{
-	return _wcsnicmp(a, b, max(wcslen(a), wcslen(b))) == 0;
-}
-
-wstring Application::runConsoleCommand(wstring cmd)
-{
-	vector<wstring> args; // #2: Search for tokens
-	split(args, cmd, is_any_of(" "), token_compress_on);
-	if (strcompare(cmd.c_str(), L"clip"))
-	{
-		noclip = !noclip;
-		wstring resp = noclip ? L"Successfully enabled noclip" : L"Successfully disabled noclip";
-		return resp;
-	}
-	if (strcompare(cmd.c_str(), L"props"))
-	{
-		SHOWPROPS = !SHOWPROPS;
-		wstring resp = SHOWPROPS ? L"Successfully enabled props" : L"Successfully disabled props";
-		return resp;
-	}
-	if (strcompare(cmd.c_str(), L"init"))
-	{
-		init();
-		return L"Successfully reinitialized app";
-	}
-	else if (strcompare(cmd.c_str(), L"debug"))
-	{
-		DEBUGVIEW = !DEBUGVIEW;
-		if (DEBUGVIEW)
-		{
-			PLAYER_SIZE = PLAYER_SIZE_DEBUG;
-			GRIDSIZE = GRIDSIZE_DEBUG;
-			onResize(SCREEN_BOUNDS.right(), SCREEN_BOUNDS.bottom());
-			return L"Successfully enabled debugview";
-		}
-		else
-		{
-			PLAYER_SIZE = PLAYER_SIZE_;
-			GRIDSIZE = GRIDSIZE_;
-			onResize(SCREEN_BOUNDS.right(), SCREEN_BOUNDS.bottom());
-			return L"Successfully disabled debugview";
-		}
-	}
-	else if (strcompare(cmd.c_str(), L"clear"))
-	{
-		console_history.clear();
-		return L"Successfully cleared console";
-	}
-	else if (strcompare(cmd.c_str(), L"save"))
-	{
-		saveconfig(APP_PATH + L"\\output.txt", newcolliders, newprops, newcolorrect, colliders, props, colorrect);
-		return L"Successfully saved assets";
-	}
-	else if (starts_with(cmd, "asset"))
-	{
-		wstring ws = args[1];
-		currentasset = converter.to_bytes(ws);
-		wstring str = L"Set current asset to " + args[1];
-		return str;
-	}
-	else if (starts_with(cmd, "color"))
-	{
-		wstring ws = args[1];
-		currentcolor = converter.to_bytes(ws);
-		wstring str = L"Set current color to " + args[1];
-		return str;
-	}
-	else
-		return L"";
-}
 
 void Application::Paint()
 {
@@ -204,7 +66,7 @@ void Application::Paint()
 
 	for (ColorRect *p : colorrect)
 	{
-		ID2D1SolidColorBrush *br2 = getColor(p->getColor());
+		ID2D1SolidColorBrush *br2 = colors[p->getColor()];
 		if (br2 == nullptr)
 			continue;
 		X::Rect obj = schemToLocal(*p);
@@ -215,20 +77,20 @@ void Application::Paint()
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 	const int z = 2;
-	if (DEBUGVIEW)
+	if (debugview)
 	{
 		for (int y = LEVEL_BOUNDS.top() - z; y < LEVEL_BOUNDS.bottom() + z; y++)
 		{
 			for (int x = LEVEL_BOUNDS.left() - z; x < LEVEL_BOUNDS.right() + z; x++)
 			{
 				X::Point coord(x, y);
-				coord.multiplySelf(GRIDSIZE);
+				coord.multiplySelf(gridsize);
 				coord.addDotSelf(location.multiply(-1));
 
-				if (CollisionUtil::staticCollision(X::Rect(coord, X::Point(coord.getX() + GRIDSIZE, coord.getY() + GRIDSIZE)), SCREEN_BOUNDS))
+				if (CollisionUtil::staticCollision(X::Rect(coord, X::Point(coord.getX() + gridsize, coord.getY() + gridsize)), SCREEN_BOUNDS))
 				{
-					pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX(), coord.getIY() + GRIDSIZE), getColor("green"), 1);
-					pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX() + GRIDSIZE, coord.getIY()), getColor("green"), 1);
+					pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX(), coord.getIY() + gridsize), colors["green"], 1);
+					pRT->DrawLine(D2D1::Point2F(coord.getIX(), coord.getIY()), D2D1::Point2F(coord.getIX() + gridsize, coord.getIY()), colors["green"], 1);
 				}
 			}
 		}
@@ -236,54 +98,54 @@ void Application::Paint()
 
 	if (firstpoint_b == false)
 	{
-		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / gridsize), round((Peripherals::mousePos().getY() + location.getY()) / gridsize));
 		Point p2 = schemToLocalPoint(p1);
 		if (editmode == 2)
 		{
 			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint), p2);
 
-			pRT->FillRectangle(loc.toRectF(), getColor(currentcolor));
+			pRT->FillRectangle(loc.toRectF(), colors[currentcolor]);
 
 			wstring str = L"color=" + converter.from_bytes(currentcolor);
-			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
 
-	for (GameObject *collider : colliders)
+	for (Collider *collider : colliders)
 	{
-		if (!collider->visible() && !DEBUGVIEW)
+		if (!collider->visible() && !debugview)
 			continue;
 		X::Rect obj = schemToLocal(*collider);
 		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 			continue;
 
-		pRT->DrawRectangle(obj.toRectF(), getColor("black"), 4);
+		pRT->DrawRectangle(obj.toRectF(), colors["black"], 4);
 	}
 
 	for (LevelProp *p : props)
 	{
-		if (getResource(p->res()) != NULL && p->getZ() <= 1.000)
+		if (resources[p->res()] != NULL && p->getZ() <= 1.000)
 		{
 			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
-			pRT->DrawBitmap(getResource(p->res()), obj.expanded(1).toRectF(), FLOAT(1.0f));
+			pRT->DrawBitmap(resources[p->res()], obj.expanded(1).toRectF(), FLOAT(1.0f));
 		}
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
 
-	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), getColor("red"));
+	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), colors["red"]);
 
-	if (SHOWPROPS)
+	if (showprops)
 	{
 		for (LevelProp *p : props)
 		{
-			if (getResource(p->res()) != NULL && p->getZ() > 1.000)
+			if (resources[p->res()] != NULL && p->getZ() > 1.000)
 			{
-				X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+				X::Rect obj = schemToLocalZ(*p, p->getZ()== 1.001?1.000:p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
 				if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 					continue;
-				pRT->DrawBitmap(getResource(p->res()), obj.toRectF(), FLOAT(1.0f));
+				pRT->DrawBitmap(resources[p->res()], obj.toRectF(), FLOAT(1.0f));
 			}
 			//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 		}
@@ -292,58 +154,58 @@ void Application::Paint()
 	//draw console
 	if (console_up)
 	{
-		pRT->FillRectangle(SCREEN_BOUNDS.toRectF(), getColor("debug_background"));
+		pRT->FillRectangle(SCREEN_BOUNDS.toRectF(), colors["debug_background"]);
 
 		for (int i = 0; i < console_history.size() && i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + 25 < SCREEN_BOUNDS.bottom() - 50; i++)
 		{
 			ConsoleLine line = console_history[i];
-			ID2D1SolidColorBrush *color = line.getOwner() == 0 ? getColor("orange") : getColor("white");
+			ID2D1SolidColorBrush *color = line.getOwner() == 0 ? colors["orange"] : colors["white"];
 
-			pRT->DrawText(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + 20, SCREEN_BOUNDS.right() - 40, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + CONSOLE_TEXT_SIZE + 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(line.getText().c_str(), wcslen(line.getText().c_str()), console_txt, D2D1::RectF(20, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + 20, SCREEN_BOUNDS.right() - 40, i * (CONSOLE_TEXT_SIZE + CONSOLE_TEXT_SPACING) + CONSOLE_TEXT_SIZE + 20), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 
-		pRT->DrawText(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, SCREEN_BOUNDS.bottom() - 20 - CONSOLE_TEXT_SIZE, SCREEN_BOUNDS.right() - 40, SCREEN_BOUNDS.bottom() - 20), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+		pRT->DrawText(current_command.c_str(), wcslen(current_command.c_str()), console_txt, D2D1::RectF(20, SCREEN_BOUNDS.bottom() - 20 - CONSOLE_TEXT_SIZE, SCREEN_BOUNDS.right() - 40, SCREEN_BOUNDS.bottom() - 20), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 	}
 
 	//draw pointer and level designer stuff
-	if (DEBUGVIEW)
+	if (debugview)
 	{
 		if (editmode == 0)
-			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), getColor("red"), 2);
+			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), colors["red"], 2);
 		else if (editmode == 1)
-			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), getColor("black"), 2);
+			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), colors["black"], 2);
 		else if (editmode == 2)
-			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), getColor("orange"), 2);
+			pRT->DrawEllipse(D2D1::Ellipse(Peripherals::mousePos().P2F(), 6, 6), colors["orange"], 2);
 	}
 
-	Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+	Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / gridsize), round((Peripherals::mousePos().getY() + location.getY()) / gridsize));
 	if (firstpoint_b == false)
 	{
 
 		Point p2 = schemToLocalPoint(p1);
 		if (editmode == 0)
 		{
-			pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), p2.P2F(), getColor("red"), 4);
+			pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), p2.P2F(), colors["red"], 4);
 		}
 		else if (editmode == 1)
 		{
 			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint), p2);
-			ID2D1Bitmap *asset = getResource(currentasset);
+			ID2D1Bitmap *asset = resources[currentasset];
 			if (asset != nullptr)
 			{
 				pRT->DrawBitmap(asset, loc.toRectF(), FLOAT(0.6f));
 			}
-			pRT->DrawRectangle(loc.toRectF(), getColor("red"), 4);
+			pRT->DrawRectangle(loc.toRectF(), colors["red"], 4);
 
 			X::Rect r1 = X::Rect(firstpoint, p1);
 			wstring str = L"z=" + std::to_wstring(select_z) + L"  size=(" + to_wstring((int)(r1.right() - r1.left())) + L"," + to_wstring((int)(r1.bottom() - r1.top())) + L")";
-			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
 		}
 	}
 
 	wstring str = L"coord=(" + to_wstring((int)p1.getX()) + L"," + to_wstring((int)p1.getY()) + L")";
-	pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(SCREEN_BOUNDS.right() - 100, 20, SCREEN_BOUNDS.right(), 50), getColor("black"), D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
-	if (DEBUGVIEW)
+	pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(SCREEN_BOUNDS.right() - 100, 20, SCREEN_BOUNDS.right(), 50), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+	if (debugview)
 	{
 		//pRT->DrawRectangle(D2D1::RectF(SCREEN_BOUNDS.right() * 0.2, SCREEN_BOUNDS.bottom() * 0.2, SCREEN_BOUNDS.right() * 0.8, SCREEN_BOUNDS.bottom() * 0.8), getColor("red"), 6);
 	}
@@ -354,7 +216,7 @@ void Application::tick(long tick)
 {
 
 	LEVEL_BOUNDS = X::Rect(9999, 9999, -9999, -9999);
-	for (GameObject *o : colliders)
+	for (Collider *o : colliders)
 	{
 		if ((*o).left() < LEVEL_BOUNDS.left())
 			LEVEL_BOUNDS.setLeft((*o).left());
@@ -390,7 +252,7 @@ void Application::tick(long tick)
 
 	if (!firstpoint_b)
 	{
-		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / GRIDSIZE), round((Peripherals::mousePos().getY() + location.getY()) / GRIDSIZE));
+		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / gridsize), round((Peripherals::mousePos().getY() + location.getY()) / gridsize));
 		if (p1.getX() < LEVEL_BOUNDS.left())
 			LEVEL_BOUNDS.setLeft(p1.getX());
 		if (p1.getX() > LEVEL_BOUNDS.right())
@@ -410,7 +272,7 @@ void Application::tick(long tick)
 
 	double movex = 0;
 	double movey = 0;
-	const double maxspeed = DEBUGVIEW ? PLAYER_SPEED_DEBUG : PLAYER_SPEED;
+	const double maxspeed = debugview ? PLAYER_SPEED_DEBUG : PLAYER_SPEED;
 
 	{
 		int intent_x = 0;
@@ -472,7 +334,7 @@ void Application::tick(long tick)
 		bool grounded = false;
 		bool colliding = false;
 
-		for (GameObject *r : colliders)
+		for (Collider *r : colliders)
 		{
 			X::Rect obj = schemToLocal(*r);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
@@ -558,39 +420,39 @@ void Application::InputProcessing()
 	}
 
 	//CLICK PROCESSING
-	if (DEBUGVIEW)
+	if (debugview)
 	{
 		if (Peripherals::mouseClickedLeft())
 		{
 			X::Point m = Peripherals::mouseClickLeftPos();
 			if (firstpoint_b)
 			{
-				firstpoint = X::Point(round((m.getX() + location.getX()) / GRIDSIZE), round((m.getY() + location.getY()) / GRIDSIZE));
+				firstpoint = X::Point(round((m.getX() + location.getX()) / gridsize), round((m.getY() + location.getY()) / gridsize));
 				firstpoint_b = false;
 			}
 			else
 			{
-				secondpoint = X::Point(round((m.getX() + location.getX()) / GRIDSIZE), round((m.getY() + location.getY()) / GRIDSIZE));
+				secondpoint = X::Point(round((m.getX() + location.getX()) / gridsize), round((m.getY() + location.getY()) / gridsize));
 
 				X::Point topleft = X::Point(min(firstpoint.getX(), secondpoint.getX()), min(firstpoint.getY(), secondpoint.getY()));
 				X::Point bottomright = X::Point(max(firstpoint.getX(), secondpoint.getX()), max(firstpoint.getY(), secondpoint.getY()));
 
 				if (editmode == 0)
 				{
-					GameObject *r = new GameObject(topleft, bottomright, true);
+					Collider *r = new Collider(topleft, bottomright, true);
 					newcolliders.push_back(r);
 					colliders.push_back(r);
 				}
 				else if (editmode == 1)
 				{
-					//X::Rect((r.left()*GRIDSIZE-location.getX()*z), r.top()*GRIDSIZE-location.getY()*z,(r.left()*GRIDSIZE-location.getX()*z)+((r.right()-r.left())*GRIDSIZE),r.top()*GRIDSIZE-location.getY()*z+((r.bottom()-r.top())*GRIDSIZE));
+					//X::Rect((r.left()*gridsize-location.getX()*z), r.top()*gridsize-location.getY()*z,(r.left()*gridsize-location.getX()*z)+((r.right()-r.left())*gridsize),r.top()*gridsize-location.getY()*z+((r.bottom()-r.top())*gridsize));
 					LevelProp *p = new LevelProp(currentasset, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), select_z);
 					newprops.push_back(p);
 					props.push_back(p);
 				}
 				else if (editmode == 2)
 				{
-					//X::Rect((r.left()*GRIDSIZE-location.getX()*z), r.top()*GRIDSIZE-location.getY()*z,(r.left()*GRIDSIZE-location.getX()*z)+((r.right()-r.left())*GRIDSIZE),r.top()*GRIDSIZE-location.getY()*z+((r.bottom()-r.top())*GRIDSIZE));
+					//X::Rect((r.left()*gridsize-location.getX()*z), r.top()*gridsize-location.getY()*z,(r.left()*gridsize-location.getX()*z)+((r.right()-r.left())*gridsize),r.top()*gridsize-location.getY()*z+((r.bottom()-r.top())*gridsize));
 					ColorRect *r = new ColorRect(currentcolor, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()));
 					newcolorrect.push_back(r);
 					colorrect.push_back(r);
@@ -656,7 +518,10 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory)
 		L"en-us",
 		&debug_txt);
 
-	wstring p = APP_PATH + wstring(L"\\res\\");
+	wstring p = INFO::INFO::APP_PATH + wstring(L"\\res\\");
+	std::cout << "RES PATH=";
+	std::wcout << p;
+	std::cout << std::endl;
 	if (fs::is_directory(p))
 	{
 
@@ -682,7 +547,7 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory)
 }
 void Application::DeinitResources()
 {
-	for (GameObject *obj : colliders)
+	for (Collider *obj : colliders)
 	{
 		delete obj;
 	}
@@ -726,41 +591,43 @@ void Application::init()
 	newcolliders.clear();
 	newprops.clear();
 	newcolorrect.clear();
-	readconfig(APP_PATH + L"\\level.txt", pRT, colliders, props, colorrect, colors);
+	readconfig(INFO::APP_PATH + L"\\level.txt");
 }
 
 void Application::onResize(int width, int height)
 {
-	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - PLAYER_SIZE) / 2, height * 0.60 - PLAYER_SIZE / 2), X::Point((width + PLAYER_SIZE) / 2, height * 0.60 + PLAYER_SIZE / 2));
+	PLAYER_SCREEN_LOC = X::Rect(X::Point((width - player_size) / 2, height * 0.60 - player_size / 2), X::Point((width + player_size) / 2, height * 0.60 + player_size / 2));
 	SCREEN_BOUNDS = X::Rect(X::Point(0, 0), X::Point(width, height));
 }
 
-X::Rect schemToLocal(X::Rect r)
+X::Rect Application::schemToLocal(X::Rect r)
 {
-	///multiply by GRIDSIZE, subtract camera location
-	return X::Rect(r.left() * GRIDSIZE - location.getX(), r.top() * GRIDSIZE - location.getY(), r.right() * GRIDSIZE - location.getX(), r.bottom() * GRIDSIZE - location.getY());
+	///multiply by gridsize, subtract camera location
+	return X::Rect(r.left() * gridsize - location.getX(), r.top() * gridsize - location.getY(), r.right() * gridsize - location.getX(), r.bottom() * gridsize - location.getY());
 }
 
-X::Rect schemToLocalZ(X::Rect r, double z, int width, int height)
+X::Rect Application::schemToLocalZ(X::Rect r, double z, int width, int height)
 {
 	X::Point p = X::Point(
-		r.left() * GRIDSIZE * z - (location.getX() + PLAYER_SCREEN_LOC.left()) * z + PLAYER_SCREEN_LOC.left() + (z - 1) * PLAYER_SIZE / 2,
-		r.top() * GRIDSIZE - location.getY());
+		r.left() * gridsize * z - (location.getX() + PLAYER_SCREEN_LOC.left()) * z + PLAYER_SCREEN_LOC.left() + (z - 1) * player_size / 2,
+		r.top() * gridsize - location.getY());
 	return X::Rect(p.getX(),
 				   p.getY(),
-				   p.getX() + (r.right() - r.left()) * GRIDSIZE,
-				   p.getY() + (r.bottom() - r.top()) * GRIDSIZE);
+				   p.getX() + (r.right() - r.left()) * gridsize,
+				   p.getY() + (r.bottom() - r.top()) * gridsize);
+}
+
+X::Point Application::schemToLocalPoint(X::Point r)
+{
+	X::Rect rect = X::Rect(r.getX() * gridsize - location.getX(), r.getY() * gridsize - location.getY(), 0, 0);
+	return X::Point(rect.left(), rect.top());
 }
 
 Application::Application()
 {
 }
 
-X::Point schemToLocalPoint(X::Point r)
-{
-	///multiply by GRIDSIZE, subtract camera location
-	return X::Point(r.getX() * GRIDSIZE - location.getX(), r.getY() * GRIDSIZE - location.getY());
-}
+
 
 ConsoleLine::ConsoleLine(int owner, wstring text)
 {

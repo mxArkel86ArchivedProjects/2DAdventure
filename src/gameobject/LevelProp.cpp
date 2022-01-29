@@ -1,4 +1,4 @@
-#include "LevelProp.h"
+#include "../headers/LevelProp.h"
 
 LevelProp::LevelProp(){
 

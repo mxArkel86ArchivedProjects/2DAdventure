@@ -1,17 +1,10 @@
 //#include <stdafx.h>
-#include "imports.h"
-#include "application.h"
-#include "util/util.h"
-#include "Peripherals.h"
-#include <iostream>
+#include "../headers/imports.h"
+#include "../headers/application.h"
+#include "../headers/Peripherals.h"
+#include "../headers/util.h"
 
-#pragma comment(lib, "d2d1")
-
-#define WIN_WIDTH 1280
-#define WIN_HEIGHT 720
-
-#define TIMER1 1
-#define TIMER2 2
+wstring INFO::APP_PATH = L"";
 
 static Application app;
 static ID2D1HwndRenderTarget* pRT = NULL;
@@ -19,6 +12,8 @@ static ID2D1Factory* pD2DFactory = NULL;
 static IDWriteFactory* pDWriteFactory;
 IWICImagingFactory *pWICFactory = NULL;
 
+using convert_type = std::codecvt_utf8<wchar_t>;
+std::wstring_convert<convert_type, wchar_t> converter_1;
 long tick = 0;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -56,6 +51,17 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         NULL,                     // window menu handle
         hInstance,                // program instance handle
         NULL);                    // creation parameters
+
+    TCHAR buff_121[256];
+
+    DWORD ret121 = GetModuleFileNameA(NULL, buff_121, 256);
+
+    vector<wstring> args; // #2: Search for tokens
+    wstring filepath = wstring(converter_1.from_bytes(string(buff_121, ret121)));
+    split(args, filepath, is_any_of("\\"), token_compress_on);
+    args.pop_back();
+    wstring full = join(args, L"\\");
+    INFO::APP_PATH = full;
 
     AllocConsole();
     freopen("CONIN$", "r", stdin);

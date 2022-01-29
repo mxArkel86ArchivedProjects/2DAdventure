@@ -1,5 +1,4 @@
-#include "CollisionUtil.h"
-#include <math.h>
+#include "../headers/CollisionUtil.h"
 
 CollisionReturn CollisionUtil::DynamicCollision(Rect a, Rect b, double dx, double dy) {
 	CollisionReturn ret =  CollisionReturn();

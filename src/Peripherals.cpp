@@ -1,4 +1,4 @@
-#include "Peripherals.h"
+#include "../headers/Peripherals.h"
 
 #define XINPUT_GAMEPAD_DEADZONE 7849
 #define XINPUT_GAMEPAD_TRIGGER_THRESHOLD 30
@@ -48,7 +48,7 @@ bool Peripherals::controllerConnected(int i, XINPUT_STATE &state)
 	return (dwResult == ERROR_SUCCESS);
 }
 
-X::PolarPoint Peripherals::controllerOutput(int i)
+PolarPoint Peripherals::controllerOutput(int i)
 {
 	XINPUT_STATE state;
 	bool c = controllerConnected(i, state);
