@@ -8,6 +8,7 @@
 #include "../headers/LevelProp.h"
 #include "../headers/ImageUtil.h"
 #include "../headers/ColorRect.h"
+#include "../headers/ResetBox.h"
 #include "../headers/util.h"
 
 using convert_type = std::codecvt_utf8<wchar_t>;
@@ -17,7 +18,6 @@ IDWriteTextFormat *console_txt;
 IDWriteTextFormat *debug_txt;
 
 
-X::Point location;
 double x1 = 0;
 double vertical_velocity = 0;
 bool console_up = false;
@@ -39,6 +39,33 @@ inline bool strcompare(const wchar_t* a, const wchar_t* b)
 {
 	return _wcsnicmp(a, b, max(wcslen(a), wcslen(b))) == 0;
 }
+
+X::Rect schemToLocal(X::Rect r, double gridsize, X::Point location)
+{
+	///multiply by gridsize, subtract camera location
+	return X::Rect(r.left() * gridsize - location.getX(), r.top() * gridsize - location.getY(), r.right() * gridsize - location.getX(), r.bottom() * gridsize - location.getY());
+}
+
+X::Rect schemToLocalZ(X::Rect r, X::Rect PLAYER_SCREEN_LOC, X::Point location, double gridsize, double z, int width, int height)
+{
+	X::Point p = X::Point(
+		r.left() * gridsize * z - location.getX() * z - (PLAYER_SCREEN_LOC.left() * z - PLAYER_SCREEN_LOC.left()) + (r.width() * gridsize / 2 * z - r.width() * gridsize / 2) - (PLAYER_SCREEN_LOC.width() / 2 * z - PLAYER_SCREEN_LOC.width() / 2),
+		r.top() * gridsize * z - location.getY() * z - PLAYER_SCREEN_LOC.top() * z + PLAYER_SCREEN_LOC.top() + r.height() * gridsize * z - r.height() * gridsize - PLAYER_SCREEN_LOC.height() * z + PLAYER_SCREEN_LOC.height());
+	return X::Rect(p.getX(),
+		p.getY(),
+		p.getX() + (r.right() - r.left()) * gridsize,
+		p.getY() + (r.bottom() - r.top()) * gridsize);
+}
+X::Point schemToLocalPoint(X::Point r, double gridsize, Point location)
+{
+	X::Rect rect = X::Rect(r.getX() * gridsize - location.getX(), r.getY() * gridsize - location.getY(), 0, 0);
+	return X::Point(rect.left(), rect.top());
+}
+
+void Application::setPlayerLocFromSchemPoint(X::Point p) {
+	location = Point(p.getX() * gridsize - PLAYER_SCREEN_LOC.left(), p.getY() * gridsize - PLAYER_SCREEN_LOC.top() - PLAYER_SCREEN_LOC.height() - 0.05 * gridsize);
+}
+
 
 void Application::InitColor(string name, D2D1_COLOR_F color)
 {
@@ -64,18 +91,38 @@ void Application::Paint()
 {
 	pRT->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
+
+	
 	for (ColorRect *p : colorrect)
 	{
+		if(p->isForeground()==false){
 		ID2D1SolidColorBrush *br2 = colors[p->getColor()];
 		if (br2 == nullptr)
 			continue;
-		X::Rect obj = schemToLocal(*p);
+		X::Rect obj = schemToLocal(*p, gridsize, location);
 
 		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 			continue;
 		pRT->FillRectangle(obj.expanded(1).toRectF(), br2);
+		}
 		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 	}
+
+	for (LevelProp *p : props)
+	{
+		if (resources[p->res()] != NULL && p->getZ() < 1.000)
+		{
+			X::Rect obj = schemToLocalZ(*p, PLAYER_SCREEN_LOC, location, gridsize, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			pRT->DrawRectangle(D2D1::RectF(obj.left() - 4, obj.top() - 4, obj.left() + 4, obj.top() + 4), colors["red"], 2.0);
+			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+				continue;
+			pRT->DrawBitmap(resources[p->res()], obj.expanded(1).toRectF(), FLOAT(1.0f));
+		}
+		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
+
+	pRT->FillRectangle(SCREEN_BOUNDS.toRectF(), colors["background_fog"]);
+
 	const int z = 2;
 	if (debugview)
 	{
@@ -96,37 +143,12 @@ void Application::Paint()
 		}
 	}
 
-	if (firstpoint_b == false)
-	{
-		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / gridsize), round((Peripherals::mousePos().getY() + location.getY()) / gridsize));
-		Point p2 = schemToLocalPoint(p1);
-		if (editmode == 2)
-		{
-			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint), p2);
-
-			pRT->FillRectangle(loc.toRectF(), colors[currentcolor]);
-
-			wstring str = L"color=" + converter.from_bytes(currentcolor);
-			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
-		}
-	}
-
-	for (Collider *collider : colliders)
-	{
-		if (!collider->visible() && !debugview)
-			continue;
-		X::Rect obj = schemToLocal(*collider);
-		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
-			continue;
-
-		pRT->DrawRectangle(obj.toRectF(), colors["black"], 4);
-	}
-
 	for (LevelProp *p : props)
 	{
-		if (resources[p->res()] != NULL && p->getZ() <= 1.000)
+		if (resources[p->res()] != NULL && p->getZ() == 1.000)
 		{
-			X::Rect obj = schemToLocalZ(*p, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			X::Rect obj = schemToLocalZ(*p, PLAYER_SCREEN_LOC, location, gridsize, p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+			pRT->DrawRectangle(D2D1::RectF(obj.left() - 4, obj.top() - 4, obj.left() + 4, obj.top() + 4), colors["red"], 2.0);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 			pRT->DrawBitmap(resources[p->res()], obj.expanded(1).toRectF(), FLOAT(1.0f));
@@ -136,19 +158,68 @@ void Application::Paint()
 
 	pRT->FillRectangle(PLAYER_SCREEN_LOC.toRectF(), colors["red"]);
 
+	for (ColorRect *p : colorrect)
+	{
+		if(p->isForeground()==true){
+		ID2D1SolidColorBrush *br2 = colors[p->getColor()];
+		if (br2 == nullptr)
+			continue;
+		X::Rect obj = schemToLocal(*p, gridsize, location);
+
+		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+			continue;
+		pRT->FillRectangle(obj.expanded(1).toRectF(), br2);
+		}
+		//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
+	}
+
+
+	if (firstpoint_b == false)
+	{
+		Point p1 = X::Point(round((Peripherals::mousePos().getX() + location.getX()) / gridsize), round((Peripherals::mousePos().getY() + location.getY()) / gridsize));
+		Point p2 = schemToLocalPoint(p1, gridsize, location);
+		if (editmode == 2)
+		{
+			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint, gridsize, location), p2);
+
+			pRT->FillRectangle(loc.toRectF(), colors[currentcolor]);
+
+			wstring str = L"color=" + converter.from_bytes(currentcolor);
+			pRT->DrawText(str.c_str(), wcslen(str.c_str()), debug_txt, D2D1::RectF(20, 20, 400, 40), colors["black"], D2D1_DRAW_TEXT_OPTIONS_NONE, DWRITE_MEASURING_MODE_NATURAL);
+		}
+	}
+
+
+	for (Collider *collider : colliders)
+	{
+		if (!collider->visible() && !debugview)
+			continue;
+		X::Rect obj = schemToLocal(*collider, gridsize, location);
+		if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
+			continue;
+
+		pRT->DrawRectangle(obj.toRectF(), colors["black"], 4);
+	}
+
 	if (showprops)
 	{
 		for (LevelProp *p : props)
 		{
 			if (resources[p->res()] != NULL && p->getZ() > 1.000)
 			{
-				X::Rect obj = schemToLocalZ(*p, p->getZ()== 1.001?1.000:p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+				X::Rect obj = schemToLocalZ(*p, PLAYER_SCREEN_LOC, location, gridsize, p->getZ()== 1.001?1.000:p->getZ(), (int)SCREEN_BOUNDS.right(), (int)SCREEN_BOUNDS.bottom());
+				pRT->DrawRectangle(D2D1::RectF(obj.left() - 4, obj.top() - 4, obj.left() + 4, obj.top() + 4), colors["red"], 2.0);
 				if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 					continue;
 				pRT->DrawBitmap(resources[p->res()], obj.toRectF(), FLOAT(1.0f));
 			}
 			//pRT->DrawRectangle(obj.toRectF(), BLACK_b, 6);
 		}
+	}
+
+	for(ResetBox* b : resetboxes){
+		Rect r = schemToLocal(*b, gridsize, location);
+		pRT->DrawRectangle(r.toRectF(), colors["green"], 2.0);
 	}
 
 	//draw console
@@ -182,14 +253,14 @@ void Application::Paint()
 	if (firstpoint_b == false)
 	{
 
-		Point p2 = schemToLocalPoint(p1);
+		Point p2 = schemToLocalPoint(p1, gridsize, location);
 		if (editmode == 0)
 		{
-			pRT->DrawLine(schemToLocalPoint(firstpoint).P2F(), p2.P2F(), colors["red"], 4);
+			pRT->DrawLine(schemToLocalPoint(firstpoint, gridsize, location).P2F(), p2.P2F(), colors["red"], 4);
 		}
 		else if (editmode == 1)
 		{
-			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint), p2);
+			X::Rect loc = X::Rect(schemToLocalPoint(firstpoint, gridsize, location), p2);
 			ID2D1Bitmap *asset = resources[currentasset];
 			if (asset != nullptr)
 			{
@@ -324,6 +395,18 @@ void Application::tick(long tick)
 		// t++;
 	}
 
+
+	for(ResetBox* b : resetboxes){
+		Rect r = schemToLocal(*b, gridsize, location);
+		bool colliding = CollisionUtil::staticCollision(PLAYER_SCREEN_LOC, r);
+		if(colliding){
+			Point p = *(checkpoints[b->getCheckpoint()]);
+			setPlayerLocFromSchemPoint(p);
+			vertical_velocity = 0;
+			movey = 0;
+		}
+	}
+
 	if (!noclip)
 	{
 		vertical_velocity -= GRAV_CONST;
@@ -336,7 +419,7 @@ void Application::tick(long tick)
 
 		for (Collider *r : colliders)
 		{
-			X::Rect obj = schemToLocal(*r);
+			X::Rect obj = schemToLocal(*r, gridsize, location);
 			if (!CollisionUtil::staticCollision(obj, SCREEN_BOUNDS))
 				continue;
 			CollisionReturn ret = CollisionUtil::DynamicCollision(PLAYER_SCREEN_LOC, obj, movex, movey);
@@ -346,7 +429,10 @@ void Application::tick(long tick)
 				if (ret.disp_y <= 0 && ret.intent_y < 0)
 				{
 					grounded = true;
+					movey = -ret.disp_y;
 				}
+				
+				
 			}
 
 			// CollisionReturn ret2 = dynamicCollision(p2, obj, movex, 0);
@@ -358,6 +444,7 @@ void Application::tick(long tick)
 
 		if (colliding)
 		{
+			location.addDotSelf(X::Point(0, movey>0?movey:0));
 			// camy += dist;
 			vertical_velocity = 0;
 			if (grounded)
@@ -377,6 +464,7 @@ void Application::tick(long tick)
 	}
 
 	location.addDotSelf(X::Point(movex, 0));
+
 }
 
 void Application::InputProcessing()
@@ -453,7 +541,7 @@ void Application::InputProcessing()
 				else if (editmode == 2)
 				{
 					//X::Rect((r.left()*gridsize-location.getX()*z), r.top()*gridsize-location.getY()*z,(r.left()*gridsize-location.getX()*z)+((r.right()-r.left())*gridsize),r.top()*gridsize-location.getY()*z+((r.bottom()-r.top())*gridsize));
-					ColorRect *r = new ColorRect(currentcolor, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()));
+					ColorRect *r = new ColorRect(currentcolor, X::Point(topleft.getX(), topleft.getY()), X::Point(bottomright.getX(), bottomright.getY()), false);
 					newcolorrect.push_back(r);
 					colorrect.push_back(r);
 				}
@@ -472,17 +560,17 @@ void Application::InputProcessing()
 		if (select_z_toggle)
 		{
 			select_z_toggle = false;
-			if (Peripherals::keyPressed(VK_ADD))
+			if (Peripherals::keyPressed(0xDD))//]
 			{
 				select_z += 0.25;
 			}
-			else if (Peripherals::keyPressed(VK_SUBTRACT))
+			else if (Peripherals::keyPressed(0xDB))//[
 			{
 				select_z -= 0.25;
 			}
 		}
 
-		if (!Peripherals::keyPressed(VK_ADD) && !Peripherals::keyPressed(VK_SUBTRACT))
+		if (!Peripherals::keyPressed(0xDD) && !Peripherals::keyPressed(0xDB))
 		{
 			select_z_toggle = true;
 		}
@@ -496,7 +584,7 @@ void Application::InputProcessing()
 }
 
 #define BRUSH(y, x) pRT->CreateSolidColorBrush(D2D1::ColorF(x), y);
-void Application::InitResources(IDWriteFactory *pDWriteFactory)
+void Application::InitResources()
 {
 
 	pDWriteFactory->CreateTextFormat(
@@ -544,9 +632,20 @@ void Application::InitResources(IDWriteFactory *pDWriteFactory)
 	InitColor("green", D2D1::ColorF(D2D1::ColorF::Green));
 	InitColor("orange", D2D1::ColorF(D2D1::ColorF::Orange));
 	InitColor("debug_background", D2D1::ColorF(90, 90, 90, 0.6));
+	InitColor("background_fog", D2D1::ColorF(0x383545, 0.5));
+
+	readconfig(INFO::APP_PATH + L"\\level.txt");
 }
 void Application::DeinitResources()
 {
+	colliders.clear();
+	props.clear();
+	colorrect.clear();
+	newcolliders.clear();
+	newprops.clear();
+	newcolorrect.clear();
+
+
 	for (Collider *obj : colliders)
 	{
 		delete obj;
@@ -574,24 +673,13 @@ void Application::DeinitResources()
 	SafeRelease(debug_txt);
 }
 
-Application::Application(HWND hWnd, ID2D1HwndRenderTarget *pRT, IWICImagingFactory *pWICFactory)
+Application::Application(HWND hWnd, ID2D1HwndRenderTarget *pRT, IWICImagingFactory *pWICFactory, IDWriteFactory* pDWriteFactory)
 {
 	this->hWnd = hWnd;
 	this->pRT = pRT;
 	this->pWICFactory = pWICFactory;
+	this->pDWriteFactory = pDWriteFactory;
 
-	init();
-}
-
-void Application::init()
-{
-	colliders.clear();
-	props.clear();
-	colorrect.clear();
-	newcolliders.clear();
-	newprops.clear();
-	newcolorrect.clear();
-	readconfig(INFO::APP_PATH + L"\\level.txt");
 }
 
 void Application::onResize(int width, int height)
@@ -600,28 +688,8 @@ void Application::onResize(int width, int height)
 	SCREEN_BOUNDS = X::Rect(X::Point(0, 0), X::Point(width, height));
 }
 
-X::Rect Application::schemToLocal(X::Rect r)
-{
-	///multiply by gridsize, subtract camera location
-	return X::Rect(r.left() * gridsize - location.getX(), r.top() * gridsize - location.getY(), r.right() * gridsize - location.getX(), r.bottom() * gridsize - location.getY());
-}
 
-X::Rect Application::schemToLocalZ(X::Rect r, double z, int width, int height)
-{
-	X::Point p = X::Point(
-		r.left() * gridsize * z - (location.getX() + PLAYER_SCREEN_LOC.left()) * z + PLAYER_SCREEN_LOC.left() + (z - 1) * player_size / 2,
-		r.top() * gridsize - location.getY());
-	return X::Rect(p.getX(),
-				   p.getY(),
-				   p.getX() + (r.right() - r.left()) * gridsize,
-				   p.getY() + (r.bottom() - r.top()) * gridsize);
-}
 
-X::Point Application::schemToLocalPoint(X::Point r)
-{
-	X::Rect rect = X::Rect(r.getX() * gridsize - location.getX(), r.getY() * gridsize - location.getY(), 0, 0);
-	return X::Point(rect.left(), rect.top());
-}
 
 Application::Application()
 {

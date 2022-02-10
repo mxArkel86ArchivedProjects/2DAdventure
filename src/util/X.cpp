@@ -88,6 +88,23 @@ X::PolarPoint::PolarPoint(int i){
 		null_ = true;
 }
 
+void X::Rect::shift(double l, double t, double r, double b) {
+	this->topleft.addDotSelf(X::Point(l, t));
+	this->bottomright.addDotSelf(X::Point(r, b));
+}
+void X::Rect::move(double l, double t) {
+	this->topleft.addDotSelf(X::Point(l, t));
+	this->bottomright.addDotSelf(X::Point(l, t));
+}
+
+double X::Rect::width() {
+	return abs(right() - left());
+}
+
+double X::Rect::height() {
+	return abs(bottom() - top());
+}
+
 double X::Rect::bottom() {
 	return bottomright.getY();
 }

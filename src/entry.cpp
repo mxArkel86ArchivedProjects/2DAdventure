@@ -106,8 +106,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR, INT iCmdShow)
         &pRT
     );
 
-    app = Application(hWnd, pRT, pWICFactory);
-    app.InitResources(pDWriteFactory);
+    app = Application(hWnd, pRT, pWICFactory, pDWriteFactory);
+    app.onResize(rc.right - rc.left, rc.bottom - rc.top);
+    app.InitResources();
 
     ShowWindow(hWnd, iCmdShow);
     UpdateWindow(hWnd);
